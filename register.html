@@ -7,31 +7,26 @@
 </head>
 <body>
   <h2>Daftar Crunchysystem</h2>
-  <form id="registerForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeSUfzPOeMmo9K-zZt-oP_NuAM9BY9vurs9XWOD7yl6cOl0_A/formResponse" method="POST" target="hidden_iframe" onsubmit="return handleSubmit()">
+  <form id="registerForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeSUfzPOeMmo9K-zZt-oP_NuAM9BRVyurs9XWOD7yI6cOI0_A/formResponse" method="POST" target="hidden_iframe" onsubmit="return handleSubmit()">
     <input name="entry.312484647" id="nama" placeholder="Nama Penuh" required><br>
-    <input name="entry.1875705243" id="telefon" placeholder="No Telefon" required><br>
+    <input name="entry.1875075243" id="telefon" placeholder="No Telefon" required><br>
     <input name="entry.1085061790" id="email" placeholder="Email" required><br>
-    <input name="entry.184042951" id="referral" placeholder="Kod Referral (jika ada)"><br>
-    <input type="hidden" name="submitTime" id="submitTime">
+    <input name="entry.1840492951" id="referral" placeholder="Kod Referral (jika ada)"><br>
     <button type="submit">Daftar Sekarang</button>
   </form>
 
-  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="checkSubmit()"></iframe>
+  <iframe name="hidden_iframe" style="display:none;" onload="if(submitted){ window.location.href='thank.html'; }"></iframe>
 
   <script>
     let submitted = false;
     function handleSubmit() {
-      const now = Date.now();
-      localStorage.setItem("pendaftarID", now.toString());
-      document.getElementById("submitTime").value = now;
       submitted = true;
+      const timestamp = Date.now();
+      localStorage.setItem("pendaftarID", timestamp);
+      const nama = document.getElementById("nama").value;
+      localStorage.setItem("refLink", window.location.origin + "/crunchysystem/register.html?ref=" + timestamp);
+      localStorage.setItem("namaPenuh", nama);
       return true;
-    }
-
-    function checkSubmit() {
-      if (submitted) {
-        window.location.href = "thank.html";
-      }
     }
   </script>
 </body>

@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <title>Terima Kasih!</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h2>Pendaftaran Berjaya!</h2>
-  <p>Terima kasih kerana mendaftar.</p>
-  <p style="color: green; font-weight: bold;">
-    ID Pendaftar anda: <span id="idPendaftar">Sedang dimuatkan...</span>
-  </p>
+  <p>Terima kasih kerana mendaftar, <span id="namaPenuh"></span>.</p>
+  <p><strong>ID Pendaftar anda:</strong> <span id="pendaftarID"></span></p>
+  <p><strong>Link Referral anda:</strong> <span id="refLink" style="color:green;"></span></p>
+
   <script>
-    const id = localStorage.getItem("pendaftarID");
-    document.getElementById("idPendaftar").innerText = id ? id : "Tidak dijumpai.";
+    document.getElementById("pendaftarID").innerText = localStorage.getItem("pendaftarID") || "Tidak dijumpai";
+    document.getElementById("refLink").innerText = localStorage.getItem("refLink") || "Tidak dijumpai";
+    document.getElementById("refLink").href = localStorage.getItem("refLink");
+    document.getElementById("namaPenuh").innerText = localStorage.getItem("namaPenuh") || "";
   </script>
 </body>
 </html>
