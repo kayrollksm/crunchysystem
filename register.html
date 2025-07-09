@@ -1,41 +1,72 @@
-<form id="register-form">
-  <input type="text" name="nama" placeholder="Nama">
-  <input type="text" name="telefon" placeholder="Telefon">
-  <input type="email" name="email" placeholder="Email">
-  <input type="text" name="referral" placeholder="Kod Referral (jika ada)">
-  <button type="submit">Daftar Sekarang</button>
-</form>
-
-<script>
-document.getElementById("register-form").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const data = {
-    nama: form.nama.value,
-    telefon: form.telefon.value,
-    email: form.email.value,
-    referral: form.referral.value
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycby_L5W-ZYPygB7aHSGZbKqxD3PANeWNfROHPz-xbuUA8GYO_rc2LJXWc8d1ho4mNJJeEg/exec", {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json"
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <title>Daftar Mouthgasm Crunchy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
     }
-  })
-    .then(res => res.json())
-    .then(response => {
-      if (response.status === "success") {
-        window.location.href = "thank.html?id=" + response.pendaftarID;
-      } else {
-        alert("Gagal daftar: " + response.message);
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+    }
+    button {
+      padding: 10px 30px;
+      background-color: purple;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Daftar Mouthgasm Crunchy</h2>
+  <form id="register-form">
+    <input type="text" id="nama" placeholder="Nama Penuh" required />
+    <input type="text" id="telefon" placeholder="No Telefon" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="referral" placeholder="Kod Referral (jika ada)" />
+    <button type="submit">Daftar Sekarang</button>
+  </form>
+
+  <script>
+    document.getElementById("register-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const data = {
+        nama: document.getElementById("nama").value,
+        telefon: document.getElementById("telefon").value,
+        email: document.getElementById("email").value,
+        referral: document.getElementById("referral").value
+      };
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbyodJ4jAEq9GrhMevSyZpC-MPWu8LOfdwW0MChZ0JXyUh5rU_Cz82UIlgWg6VB6-Wt6lw/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          alert("Berjaya daftar! ID Pendaftar: " + result.pendaftarID);
+          window.location.href = "thank.html";
+        } else {
+          alert("Ralat semasa pendaftaran: " + result.message);
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Ralat semasa submit borang.");
       }
-    })
-    .catch(err => {
-      alert("Ralat ketika submit borang");
-      console.error(err);
     });
-});
-</script>
+  </script>
+</body>
+</html>
