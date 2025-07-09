@@ -12,38 +12,34 @@
     <button type="submit">Daftar Sekarang</button>
   </form>
 
- <script>
-document.getElementById("registerForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+<script>
+  document.getElementById("register-form").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  const data = {
-    nama: document.getElementById("nama").value,
-    telefon: document.getElementById("telefon").value,
-    email: document.getElementById("email").value,
-    referral: document.getElementById("referral").value,
-  };
+    const form = e.target;
+    const formData = new FormData();
+    formData.append("nama", form.nama.value);
+    formData.append("telefon", form.telefon.value);
+    formData.append("email", form.email.value);
+    formData.append("referral", form.referral.value || "");
 
-  fetch("https://script.google.com/macros/s/AKfycby_L5W-ZYPygB7aHSGZbKqxD3PANeWNfROHPz-xbuUA8GYO_rc2LJXWc8d1ho4mNJJeEg/exec", {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
+    fetch("https://script.google.com/macros/s/AKfycbyh_iGdCmoIZEDjcxtrO_OkKficoAuon11FVBzA27mEJ6QAHfT7CcEUGEyhNREFLHbu/exec", {
+      method: "POST",
+      body: formData,
+    })
     .then(res => res.json())
-    .then(response => {
-      if (response.status === "success") {
-        localStorage.setItem("pendaftarID", response.pendaftarID);
-        window.location.href = "thank.html";
+    .then(data => {
+      if (data.status === "success") {
+        alert("Berjaya daftar! ID: " + data.pendaftarID);
+        form.reset();
       } else {
-        alert("Ralat: " + response.message);
+        alert("Ralat: " + data.message);
       }
     })
-    .catch(error => {
-      alert("Ralat ketika submit borang");
-      console.error(error);
+    .catch(err => {
+      alert("Ralat semasa hantar borang: " + err.message);
     });
-});
+  });
 </script>
 </body>
 </html>
