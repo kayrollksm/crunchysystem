@@ -2,26 +2,19 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terima Kasih</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Terima kasih kerana mendaftar!</h2>
-    <p>ID Pendaftar anda: <span id="idPendaftar">Loading...</span></p>
-    <p>Link Referral: <span id="referralLink"></span></p>
-  </div>
+  <h2>Terima kasih kerana mendaftar!</h2>
+  <p>ID Pendaftar anda: <span id="id"></span></p>
+  <p>Link referral anda: <span id="referral-link"></span></p>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const id = params.get("pendaftarID");
-
-    document.getElementById("idPendaftar").textContent = id || "Tiada ID";
-
+    const id = params.get("id");
     if (id) {
-      const link = `https://kayrollksm.github.io/crunchysystem/register.html?ref=${id}`;
-      document.getElementById("referralLink").textContent = link;
+      document.getElementById("id").innerText = id;
+      document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/register.html?ref=${id}`;
     }
   </script>
 </body>
