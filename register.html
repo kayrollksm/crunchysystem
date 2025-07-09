@@ -13,33 +13,34 @@
   </form>
 
 <script>
-  document.getElementById("register-form").addEventListener("submit", function (e) {
-    e.preventDefault();
+document.getElementById("register-form").addEventListener("submit", function (e) {
+  e.preventDefault();
 
-    const form = e.target;
-    const formData = new FormData();
-    formData.append("nama", form.nama.value);
-    formData.append("telefon", form.telefon.value);
-    formData.append("email", form.email.value);
-    formData.append("referral", form.referral.value || "");
+  const form = e.target;
+  const formData = new FormData();
+  formData.append("nama", form.nama.value);
+  formData.append("telefon", form.telefon.value);
+  formData.append("email", form.email.value);
+  formData.append("referral", form.referral.value);
 
-    fetch("https://script.google.com/macros/s/AKfycbyh_iGdCmoIZEDjcxtrO_OkKficoAuon11FVBzA27mEJ6QAHfT7CcEUGEyhNREFLHbu/exec", {
-      method: "POST",
-      body: formData,
-    })
+  fetch("https://script.google.com/macros/s/AKfycbyh_iGdCmoIZEDjcxtrO_OkKficoAuon11FVBzA27mEJ6QAHfT7CcEUGEyhNREFLHbu/exec", {
+    method: "POST",
+    body: formData,
+  })
     .then(res => res.json())
     .then(data => {
       if (data.status === "success") {
-        alert("Berjaya daftar! ID: " + data.pendaftarID);
+        alert("Berjaya daftar! ID anda: " + data.pendaftarID);
         form.reset();
       } else {
         alert("Ralat: " + data.message);
       }
     })
     .catch(err => {
-      alert("Ralat semasa hantar borang: " + err.message);
+      alert("Ralat semasa submit borang: " + err.message);
     });
-  });
+});
 </script>
+
 </body>
 </html>
