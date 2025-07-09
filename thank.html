@@ -1,30 +1,22 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <title>Terima Kasih!</title>
+  <meta charset="UTF-8" />
+  <title>Terima Kasih</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body style="text-align: center; padding: 50px;">
-  <h2>Pendaftaran Berjaya!</h2>
+<body>
+  <h2>Terima kasih kerana mendaftar!</h2>
   <p>ID Pendaftar anda:</p>
-  <h3 id="idPendaftar">Memuatkan...</h3>
-  <p>Kongsi link ini kepada rakan:</p>
-  <input id="shareLink" style="width: 80%; padding: 10px;" readonly>
-  <br><br>
-  <button onclick="copyLink()">Copy Link</button>
+  <h3 id="idPendaftar"></h3>
+  <p>Link referral anda:</p>
+  <h3 id="referralLink"></h3>
 
   <script>
     const id = localStorage.getItem("pendaftarID");
-    document.getElementById("idPendaftar").innerText = id ? id : "Tiada ID dijumpai.";
-    document.getElementById("shareLink").value = `https://kayrollksm.github.io/crunchysystem/register.html?ref=${id}`;
-
-    function copyLink() {
-      const copyText = document.getElementById("shareLink");
-      copyText.select();
-      copyText.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      alert("Link referral telah disalin!");
-    }
+    const link = `https://kayrollksm.github.io/crunchysystem/register.html?ref=${id}`;
+    document.getElementById("idPendaftar").innerText = id;
+    document.getElementById("referralLink").innerText = link;
   </script>
 </body>
 </html>
