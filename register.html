@@ -6,41 +6,40 @@
 <body>
   <form id="register-form">
     <input type="text" name="nama" placeholder="Nama" required><br>
-    <input type="text" name="telefon" placeholder="Telefon" required><br>
+    <input type="text" name="telefon" placeholder="No Telefon" required><br>
     <input type="email" name="email" placeholder="Email" required><br>
     <input type="text" name="referral" placeholder="Kod Referral (jika ada)"><br>
     <button type="submit">Daftar Sekarang</button>
   </form>
 
-<script>
-document.getElementById("register-form").addEventListener("submit", function (e) {
-  e.preventDefault();
+  <script>
+    document.getElementById("register-form").addEventListener("submit", function (e) {
+      e.preventDefault();
 
-  const form = e.target;
-  const formData = new FormData();
-  formData.append("nama", form.nama.value);
-  formData.append("telefon", form.telefon.value);
-  formData.append("email", form.email.value);
-  formData.append("referral", form.referral.value);
+      const form = e.target;
+      const data = new URLSearchParams();
+      data.append("nama", form.nama.value);
+      data.append("telefon", form.telefon.value);
+      data.append("email", form.email.value);
+      data.append("referral", form.referral.value);
 
-  fetch("https://script.google.com/macros/s/AKfycbyh_iGdCmoIZEDjcxtrO_OkKficoAuon11FVBzA27mEJ6QAHfT7CcEUGEyhNREFLHbu/exec", {
-    method: "POST",
-    body: formData,
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === "success") {
-        alert("Berjaya daftar! ID anda: " + data.pendaftarID);
-        form.reset();
-      } else {
-        alert("Ralat: " + data.message);
-      }
-    })
-    .catch(err => {
-      alert("Ralat semasa submit borang: " + err.message);
+      fetch("https://script.google.com/macros/s/AKfycbyh_iGdCmoIZEDjcxtrO_OkKficoAuon11FVBzA27mEJ6QAHfT7CcEUGEyhNREFLHbu/exec", {
+        method: "POST",
+        body: data
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          alert("Berjaya daftar! ID anda: " + data.pendaftarID);
+          form.reset();
+        } else {
+          alert("Ralat: " + data.message);
+        }
+      })
+      .catch(err => {
+        alert("Ralat semasa hantar borang: " + err.message);
+      });
     });
-});
-</script>
-
+  </script>
 </body>
 </html>
