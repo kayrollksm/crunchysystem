@@ -2,32 +2,59 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <title>Daftar Crunchysystem</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Daftar Mouthgasm Crunchy</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 30px; }
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 300px;
+    }
+    button {
+      background-color: purple;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>Daftar Crunchysystem</h2>
-  <form id="registerForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeSUfzPOeMmo9K-zZt-oP_NuAM9BRVyurs9XWOD7yI6cOI0_A/formResponse" method="POST" target="hidden_iframe" onsubmit="return handleSubmit()">
-    <input name="entry.312484647" id="nama" placeholder="Nama Penuh" required><br>
-    <input name="entry.1875075243" id="telefon" placeholder="No Telefon" required><br>
-    <input name="entry.1085061790" id="email" placeholder="Email" required><br>
-    <input name="entry.1840492951" id="referral" placeholder="Kod Referral (jika ada)"><br>
-    <button type="submit">Daftar Sekarang</button>
+  <h2>Daftar Mouthgasm Crunchy</h2>
+  <form id="registerForm">
+    <input type="text" id="nama" placeholder="Nama Penuh" required><br>
+    <input type="text" id="telefon" placeholder="No Telefon" required><br>
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="text" id="referral" placeholder="Kod Referral (jika ada)"><br>
+    <button type="submit">Daftar</button>
   </form>
 
-  <iframe name="hidden_iframe" style="display:none;" onload="if(submitted){ window.location.href='thank.html'; }"></iframe>
-
   <script>
-    let submitted = false;
-    function handleSubmit() {
-      submitted = true;
-      const timestamp = Date.now();
-      localStorage.setItem("pendaftarID", timestamp);
-      const nama = document.getElementById("nama").value;
-      localStorage.setItem("refLink", window.location.origin + "/crunchysystem/register.html?ref=" + timestamp);
-      localStorage.setItem("namaPenuh", nama);
-      return true;
-    }
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const data = {
+        nama: document.getElementById("nama").value,
+        telefon: document.getElementById("telefon").value,
+        email: document.getElementById("email").value,
+        referral: document.getElementById("referral").value
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycby_L5W-ZYPygB7aHSGZbKqxD3PANeWNfROHPz-xbuUA8GYO_rc2LJXWc8d1ho4mNJJeEg/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "success") {
+          localStorage.setItem("pendaftarID", res.id);
+          window.location.href = "thank.html";
+        } else {
+          alert("Pendaftaran gagal.");
+        }
+      })
+      .catch(() => alert("Ralat ketika submit borang"));
+    });
   </script>
 </body>
 </html>
