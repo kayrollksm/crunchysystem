@@ -1,44 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daftar Mouthgasm Crunchy</title>
 </head>
 <body>
+  <h2>Daftar Sekarang</h2>
   <form id="register-form">
-    <input type="text" name="nama" placeholder="Nama" required><br>
-    <input type="text" name="telefon" placeholder="Telefon" required><br>
-    <input type="email" name="email" placeholder="Email" required><br>
-    <input type="text" name="referral" placeholder="Kod Referral (jika ada)"><br>
+    <input type="text" id="nama" placeholder="Nama" required><br>
+    <input type="tel" id="telefon" placeholder="Telefon" required><br>
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="text" id="referral" placeholder="Kod Referral (jika ada)"><br>
     <button type="submit">Daftar Sekarang</button>
   </form>
+  <p id="status"></p>
 
-  <script>
-    document.getElementById("register-form").addEventListener("submit", function (e) {
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabaseUrl = 'https://qdyojftztydvhyjbdnaq.supabase.co';
+    const supabaseKey = '***REMOVED***';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const form = document.getElementById('register-form');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
-      const formData = new URLSearchParams();
-      formData.append("nama", form.nama.value);
-      formData.append("telefon", form.telefon.value);
-      formData.append("email", form.email.value);
-      formData.append("referral", form.referral.value);
 
-      fetch("https://script.google.com/macros/s/PASTE_WEB_APP_URL_SINI/exec", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.text())
-      .then(text => {
-        const data = JSON.parse(text);
-        if (data.status === "success") {
-          alert("Berjaya daftar! ID anda: " + data.pendaftarID);
-          form.reset();
-        } else {
-          alert("Ralat: " + data.message);
-        }
-      })
-      .catch(err => {
-        alert("Ralat semasa submit borang: " + err.message);
-      });
+      const nama = document.getElementById('nama').value;
+      const telefon = document.getElementById('telefon').value;
+      const email = document.getElementById('email').value;
+      const referral = document.getElementById('referral').value;
+      const pendaftar_id = '';
+
+      const { data, error } = await supabase
+        .from('pendaftar')
+        .insert([{ nama, telefon, email, referral, pendaftar_id }]);
+
+      if (error) {
+        console.error(error);
+        status.textContent = 'Ralat semasa mendaftar.';
+      } else {
+        console.log(data);
+        status.textContent = 'Pendaftaran berjaya!';
+        form.reset();
+      }
     });
   </script>
 </body>
