@@ -3,63 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Daftar Mouthgasm Crunchy</title>
-<script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js";
-
-  const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-  const supabaseKey = "***REMOVED***";
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  const form = document.getElementById("registerForm");
-
-  function getNextBatch(referralCode) {
-    if (!referralCode) return "A"; // HQ = batch A
-    const lastChar = referralCode.slice(-1).toUpperCase();
-    let next = "";
-    if (lastChar === "Z") {
-      next = "AA";
-    } else if (/^[A-Z]+$/.test(lastChar)) {
-      next = String.fromCharCode(lastChar.charCodeAt(0) + 1);
-    } else {
-      next = "A";
-    }
-    return next;
-  }
-
-  function generateRandomNumber(length = 5) {
-    const max = Math.pow(10, length);
-    return Math.floor(Math.random() * max).toString().padStart(length, "0");
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const nama = form.nama.value;
-    const telefon = form.telefon.value;
-    const email = form.email.value;
-    const referral = form.referral.value || "";
-
-    const batch = getNextBatch(referral);
-    const randomNo = generateRandomNumber();
-    const pendaftar_id = `MC${randomNo}${batch}`;
-
-    const { error } = await supabase.from("pendaftar").insert([{
-      nama,
-      telefon,
-      email,
-      referral,
-      pendaftar_id,
-      batch,
-    }]);
-
-    if (error) {
-      alert("Gagal submit: " + error.message);
-    } else {
-      localStorage.setItem("pendaftarID", pendaftar_id);
-      window.location.href = "thank.html";
-    }
-  });
-</script>
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
     input { margin: 10px 0; padding: 10px; width: 300px; }
@@ -75,5 +18,63 @@
     <input type="text" id="referral" name="referral" placeholder="Kod Referral (jika ada)"><br>
     <button type="submit">Daftar Sekarang</button>
   </form>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+    const supabaseKey = "***REMOVED***";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const form = document.getElementById("registerForm");
+
+    function getNextBatch(referralCode) {
+      if (!referralCode) return "A"; // HQ = batch A
+      const lastChar = referralCode.slice(-1).toUpperCase();
+      let next = "";
+      if (lastChar === "Z") {
+        next = "AA";
+      } else if (/^[A-Z]+$/.test(lastChar)) {
+        next = String.fromCharCode(lastChar.charCodeAt(0) + 1);
+      } else {
+        next = "A";
+      }
+      return next;
+    }
+
+    function generateRandomNumber(length = 5) {
+      const max = Math.pow(10, length);
+      return Math.floor(Math.random() * max).toString().padStart(length, "0");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nama = form.nama.value;
+      const telefon = form.telefon.value;
+      const email = form.email.value;
+      const referral = form.referral.value || "";
+
+      const batch = getNextBatch(referral);
+      const randomNo = generateRandomNumber();
+      const pendaftar_id = `MC${randomNo}${batch}`;
+
+      const { error } = await supabase.from("pendaftar").insert([{
+        nama,
+        telefon,
+        email,
+        referral,
+        pendaftar_id,
+        batch,
+      }]);
+
+      if (error) {
+        alert("Gagal submit: " + error.message);
+      } else {
+        localStorage.setItem("pendaftarID", pendaftar_id);
+        window.location.href = "thank.html";
+      }
+    });
+  </script>
 </body>
 </html>
