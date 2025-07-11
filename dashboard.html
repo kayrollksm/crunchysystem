@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Referral</title>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+    const supabaseKey = "***REMOVED***";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const tableBody = document.getElementById("referral-body");
+
+    async function fetchData() {
+      const { data, error } = await supabase.from("pendaftar").select("nama,pendaftar_id");
+      if (error) return alert("Gagal ambil data utama: " + error.message);
+
+      const referralCount = {};
+
+      for (const pendaftar of data) {
+        const { data: referred } = await supabase
+          .from("pendaftar")
+          .select("referral")
+          .eq("referral", pendaftar.pendaftar_id);
+
+        referralCount[pendaftar.pendaftar_id] = referred.length;
+      }
+
+      const ranked = data
+        .map(p => ({
+          nama: p.nama,
+          pendaftar_id: p.pendaftar_id,
+          count: referralCount[p.pendaftar_id] || 0
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      tableBody.innerHTML = ranked.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.nama}</td>
+          <td>${r.pendaftar_id}</td>
+          <td>${r.count}</td>
+        </tr>
+      `).join("");
+    }
+
+    fetchData();
+  </script>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    table { margin: auto; border-collapse: collapse; width: 90%; }
+    th, td { border: 1px solid #aaa; padding: 10px; }
+    th { background-color: purple; color: white; }
+  </style>
+</head>
+<body>
+  <h2>Top Referral Ranking</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Nama</th>
+        <th>ID Pendaftar</th>
+        <th>Jumlah Referral</th>
+      </tr>
+    </thead>
+    <tbody id="referral-body">
+      <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
