@@ -2,45 +2,13 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <title>Terima Kasih!</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 40px;
-    }
-    .box {
-      border: 1px solid #ccc;
-      padding: 30px;
-      border-radius: 8px;
-      display: inline-block;
-      background-color: #f9f9f9;
-    }
-    .id, .link {
-      margin: 20px 0;
-      font-size: 18px;
-      font-weight: bold;
-      color: #4b0082;
-    }
-  </style>
+  <title>Terima Kasih</title>
 </head>
 <body>
-  <div class="box">
-    <h2>Pendaftaran Berjaya!</h2>
-    <div class="id">ID Pendaftar: <span id="idPendaftar"></span></div>
-    <div class="link">Link Referral Anda:<br>
-      <span id="referralLink"></span>
-    </div>
-  </div>
-
+  <h2>Terima kasih kerana mendaftar!</h2>
+  <p>ID Pendaftar anda: <span id="idPendaftar"></span></p>
   <script>
-    const id = localStorage.getItem("pendaftarID");
-    if (id) {
-      document.getElementById("idPendaftar").textContent = id;
-      document.getElementById("referralLink").textContent = `https://mouthgasm.my/register.html?ref=${id}`;
-    } else {
-      document.querySelector(".box").innerHTML = "<p>Maaf, tiada data ditemui.</p>";
-    }
+    document.getElementById("idPendaftar").innerText = localStorage.getItem("pendaftar_id");
   </script>
 </body>
 </html>
