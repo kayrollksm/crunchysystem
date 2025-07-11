@@ -3,70 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <title>Daftar Mouthgasm Crunchy</title>
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const form = document.getElementById("registerForm");
+  const form = document.getElementById("registerForm");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const nama = form.nama.value;
-      const telefon = form.telefon.value;
-      const email = form.email.value;
-      const referral = form.referral.value.trim();
-
-      // --- Generate pendaftar_id ---
-      // Dapatkan semua user dari Supabase
-      let { data: allUsers, error } = await supabase.from("pendaftar").select("referral");
-      if (error) {
-        alert("Gagal mendapatkan data: " + error.message);
-        return;
-      }
-
-      // Tentukan batch sekarang
-      let currentBatch = "A";
-      if (referral) {
-        const refSuffix = referral.slice(-1); // contoh: MC00123B -> ambil "B"
-        currentBatch = nextBatch(refSuffix);
-      }
-
-      // Generate nombor random dan pastikan 5 digit
-      const randomNum = Math.floor(Math.random() * 99999 + 1).toString().padStart(5, "0");
-      const pendaftar_id = `MC${randomNum}${currentBatch}`;
-
-      // Insert ke Supabase
-      const { error: insertError } = await supabase.from("pendaftar").insert([
-        { nama, telefon, email, referral, pendaftar_id }
-      ]);
-
-      if (insertError) {
-        alert("Gagal daftar: " + insertError.message);
-      } else {
-        localStorage.setItem("pendaftar_id", pendaftar_id);
-        window.location.href = "thank.html";
-      }
-    });
-
-    function nextBatch(suffix) {
-      if (!suffix.match(/^[A-Z]+$/)) return "A";
-      let chars = suffix.split("");
-      for (let i = chars.length - 1; i >= 0; i--) {
-        if (chars[i] !== "Z") {
-          chars[i] = String.fromCharCode(chars[i].charCodeAt(0) + 1);
-          return chars.join("");
-        } else {
-          chars[i] = "A";
-          if (i === 0) chars.unshift("A");
-        }
-      }
-      return chars.join("");
+  function getNextBatch(referralCode) {
+    if (!referralCode) return "A"; // HQ = batch A
+    const lastChar = referralCode.slice(-1).toUpperCase();
+    let next = "";
+    if (lastChar === "Z") {
+      next = "AA";
+    } else if (/^[A-Z]+$/.test(lastChar)) {
+      next = String.fromCharCode(lastChar.charCodeAt(0) + 1);
+    } else {
+      next = "A";
     }
-  </script>
+    return next;
+  }
+
+  function generateRandomNumber(length = 5) {
+    const max = Math.pow(10, length);
+    return Math.floor(Math.random() * max).toString().padStart(length, "0");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nama = form.nama.value;
+    const telefon = form.telefon.value;
+    const email = form.email.value;
+    const referral = form.referral.value || "";
+
+    const batch = getNextBatch(referral);
+    const randomNo = generateRandomNumber();
+    const pendaftar_id = `MC${randomNo}${batch}`;
+
+    const { error } = await supabase.from("pendaftar").insert([{
+      nama,
+      telefon,
+      email,
+      referral,
+      pendaftar_id,
+      batch,
+    }]);
+
+    if (error) {
+      alert("Gagal submit: " + error.message);
+    } else {
+      localStorage.setItem("pendaftarID", pendaftar_id);
+      window.location.href = "thank.html";
+    }
+  });
+</script>
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
     input { margin: 10px 0; padding: 10px; width: 300px; }
