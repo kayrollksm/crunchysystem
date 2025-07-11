@@ -10,53 +10,76 @@
     const supabaseKey = "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const form = document.getElementById("register-form");
+    const form = document.getElementById("registerForm");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const data = {
-        nama: form.nama.value,
-        telefon: form.telefon.value,
-        email: form.email.value,
-        referral: form.referral.value,
-      };
 
-      const { error } = await supabase.from("pendaftar").insert([data]);
+      const nama = form.nama.value;
+      const telefon = form.telefon.value;
+      const email = form.email.value;
+      const referral = form.referral.value.trim();
+
+      // --- Generate pendaftar_id ---
+      // Dapatkan semua user dari Supabase
+      let { data: allUsers, error } = await supabase.from("pendaftar").select("referral");
       if (error) {
-        alert("Gagal submit: " + error.message);
+        alert("Gagal mendapatkan data: " + error.message);
+        return;
+      }
+
+      // Tentukan batch sekarang
+      let currentBatch = "A";
+      if (referral) {
+        const refSuffix = referral.slice(-1); // contoh: MC00123B -> ambil "B"
+        currentBatch = nextBatch(refSuffix);
+      }
+
+      // Generate nombor random dan pastikan 5 digit
+      const randomNum = Math.floor(Math.random() * 99999 + 1).toString().padStart(5, "0");
+      const pendaftar_id = `MC${randomNum}${currentBatch}`;
+
+      // Insert ke Supabase
+      const { error: insertError } = await supabase.from("pendaftar").insert([
+        { nama, telefon, email, referral, pendaftar_id }
+      ]);
+
+      if (insertError) {
+        alert("Gagal daftar: " + insertError.message);
       } else {
+        localStorage.setItem("pendaftar_id", pendaftar_id);
         window.location.href = "thank.html";
       }
     });
-  </script>
 
+    function nextBatch(suffix) {
+      if (!suffix.match(/^[A-Z]+$/)) return "A";
+      let chars = suffix.split("");
+      for (let i = chars.length - 1; i >= 0; i--) {
+        if (chars[i] !== "Z") {
+          chars[i] = String.fromCharCode(chars[i].charCodeAt(0) + 1);
+          return chars.join("");
+        } else {
+          chars[i] = "A";
+          if (i === 0) chars.unshift("A");
+        }
+      }
+      return chars.join("");
+    }
+  </script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      text-align: center;
-    }
-    input {
-      margin: 10px 0;
-      padding: 10px;
-      width: 300px;
-    }
-    button {
-      padding: 10px 30px;
-      background-color: purple;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+    body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
+    input { margin: 10px 0; padding: 10px; width: 300px; }
+    button { padding: 10px 30px; background-color: purple; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
   <h2>Daftar Mouthgasm Crunchy</h2>
-  <form id="register-form">
-    <input type="text" id="nama" placeholder="Nama Penuh" required><br>
-    <input type="text" id="telefon" placeholder="No Telefon" required><br>
-    <input type="email" id="email" placeholder="Email" required><br>
-    <input type="text" id="referral" placeholder="Kod Referral (jika ada)"><br>
+  <form id="registerForm">
+    <input type="text" id="nama" name="nama" placeholder="Nama Penuh" required><br>
+    <input type="text" id="telefon" name="telefon" placeholder="No Telefon" required><br>
+    <input type="email" id="email" name="email" placeholder="Email" required><br>
+    <input type="text" id="referral" name="referral" placeholder="Kod Referral (jika ada)"><br>
     <button type="submit">Daftar Sekarang</button>
   </form>
 </body>
