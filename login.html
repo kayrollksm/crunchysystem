@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Pengguna</title>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+    const supabase = createClient(
+      "https://qdyojftztydvhyjbdnaq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    );
+
+    const form = document.getElementById("loginForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = form.email.value.trim();
+      const pendaftarID = form.pendaftar_id.value.trim();
+
+      const { data, error } = await supabase
+        .from("pendaftar")
+        .select("*")
+        .eq("email", email)
+        .eq("pendaftar_id", pendaftarID)
+        .single();
+
+      if (error || !data) {
+        alert("Maklumat tidak sah. Sila semak semula.");
+      } else {
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("pendaftarID", pendaftarID);
+        window.location.href = "dashboard.html";
+      }
+    });
+  </script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; }
+    input { margin: 10px 0; padding: 10px; width: 300px; }
+    button { padding: 10px 30px; background: green; color: white; border: none; }
+  </style>
+</head>
+<body>
+  <h2>Login Pengguna</h2>
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="text" name="pendaftar_id" placeholder="ID Pendaftar" required><br>
+    <button type="submit">Login</button>
+  </form>
+</body>
+</html>
