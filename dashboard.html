@@ -1,65 +1,62 @@
-<!DOCTYPE html>
-<html lang="ms">
+<!DOCTYPE html><html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard Referral</title>
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";// Connect ke Supabase
+const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+const supabaseKey = "***REMOVED***";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Connect ke Supabase
-    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***
-";
-    const supabase = createClient(supabaseUrl, supabaseKey);
+// Sekat jika tak login
+const pendaftarID = localStorage.getItem("pendaftarID");
+const userNama = localStorage.getItem("userNama");
 
-    // Sekat jika tak login
-    const pendaftarID = localStorage.getItem("pendaftarID");
-    const userNama = localStorage.getItem("userNama");
+if (!pendaftarID) {
+  window.location.href = "login.html";
+}
 
-    if (!pendaftarID) {
-      window.location.href = "login.html";
-    }
+document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("user-nama").innerText = userNama;
+  document.getElementById("user-id").innerText = pendaftarID;
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      document.getElementById("user-nama").innerText = userNama;
-      document.getElementById("user-id").innerText = pendaftarID;
+  const tableBody = document.getElementById("referral-body");
 
-      const tableBody = document.getElementById("referral-body");
+  const { data, error } = await supabase
+    .from("pendaftar")
+    .select("nama,pendaftar_id");
 
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("nama,pendaftar_id");
+  if (error) return alert("Gagal ambil data utama: " + error.message);
 
-      if (error) return alert("Gagal ambil data utama: " + error.message);
+  const referralCount = {};
 
-      const referralCount = {};
+  for (const p of data) {
+    const { data: referred } = await supabase
+      .from("pendaftar")
+      .select("referral")
+      .eq("referral", p.pendaftar_id);
 
-      for (const p of data) {
-        const { data: referred } = await supabase
-          .from("pendaftar")
-          .select("referral")
-          .eq("referral", p.pendaftar_id);
+    referralCount[p.pendaftar_id] = referred.length;
+  }
 
-        referralCount[p.pendaftar_id] = referred.length;
-      }
+  const ranked = data
+    .map(p => ({
+      nama: p.nama,
+      pendaftar_id: p.pendaftar_id,
+      count: referralCount[p.pendaftar_id] || 0
+    }))
+    .sort((a, b) => b.count - a.count);
 
-      const ranked = data
-        .map(p => ({
-          nama: p.nama,
-          pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0
-        }))
-        .sort((a, b) => b.count - a.count);
+  tableBody.innerHTML = ranked.map((r, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${r.nama}</td>
+      <td>${r.pendaftar_id}</td>
+      <td>${r.count}</td>
+    </tr>
+  `).join("");
+});
 
-      tableBody.innerHTML = ranked.map((r, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${r.nama}</td>
-          <td>${r.pendaftar_id}</td>
-          <td>${r.count}</td>
-        </tr>
-      `).join("");
-    });
   </script>
   <style>
     body { font-family: Arial; text-align: center; margin-top: 40px; }
@@ -70,9 +67,7 @@
 </head>
 <body>
   <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
-
-  <h3>Top Referral Ranking</h3>
+  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>  <h3>Top Referral Ranking</h3>
   <table>
     <thead>
       <tr>
