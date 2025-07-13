@@ -7,43 +7,47 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    const supabaseKey = "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
+    const form = document.getElementById("loginForm");
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email").value;
-      const id = document.getElementById("pendaftar_id").value;
+      const email = form.email.value.trim();
+      const id = form.pendaftar_id.value.trim().toUpperCase();
 
       const { data, error } = await supabase
         .from("pendaftar")
         .select("*")
         .eq("email", email)
         .eq("pendaftar_id", id)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
-        alert("Maklumat tidak sah. Sila cuba lagi.");
+        alert("Login gagal. Sila semak semula email dan ID anda.");
         return;
       }
 
+      // Simpan info dalam localStorage
       localStorage.setItem("pendaftarID", data.pendaftar_id);
       localStorage.setItem("userNama", data.nama);
+
+      // Redirect ke dashboard
       window.location.href = "dashboard.html";
     });
   </script>
-
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; }
-    input { margin: 10px 0; padding: 10px; width: 300px; }
-    button { padding: 10px 30px; background-color: purple; color: white; border: none; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    input { display: block; margin: 10px auto; padding: 10px; width: 300px; }
+    button { padding: 10px 30px; background-color: green; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>Login Pengguna</h2>
-  <form id="login-form">
-    <input type="email" id="email" placeholder="Email" required /><br>
-    <input type="text" id="pendaftar_id" placeholder="ID Pendaftar" required /><br>
+  <h2>Login ke Dashboard</h2>
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Email anda" required />
+    <input type="text" name="pendaftar_id" placeholder="ID Pendaftar (Contoh: MC12345A)" required />
     <button type="submit">Login</button>
   </form>
 </body>
