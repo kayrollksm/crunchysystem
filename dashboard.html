@@ -1,73 +1,93 @@
-<!DOCTYPE html><html lang="ms">
+<!DOCTYPE html>
+<html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard Referral</title>
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";// Connect ke Supabase
-const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-const supabaseKey = "***REMOVED***";
-const supabase = createClient(supabaseUrl, supabaseKey);
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-// Sekat jika tak login
-const pendaftarID = localStorage.getItem("pendaftarID");
-const userNama = localStorage.getItem("userNama");
+    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+    const supabaseKey = "***REMOVED***";
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-if (!pendaftarID) {
-  window.location.href = "login.html";
-}
+    // Sekat jika tak login
+    const pendaftarID = localStorage.getItem("pendaftarID");
+    const userNama = localStorage.getItem("userNama");
 
-document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("user-nama").innerText = userNama;
-  document.getElementById("user-id").innerText = pendaftarID;
+    if (!pendaftarID) {
+      window.location.href = "login.html";
+    }
 
-  const tableBody = document.getElementById("referral-body");
+    document.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("user-nama").innerText = userNama;
+      document.getElementById("user-id").innerText = pendaftarID;
 
-  const { data, error } = await supabase
-    .from("pendaftar")
-    .select("nama,pendaftar_id");
+      const tableBody = document.getElementById("referral-body");
 
-  if (error) return alert("Gagal ambil data utama: " + error.message);
+      const { data, error } = await supabase
+        .from("pendaftar")
+        .select("nama,pendaftar_id");
 
-  const referralCount = {};
+      if (error) return alert("Gagal ambil data utama: " + error.message);
 
-  for (const p of data) {
-    const { data: referred } = await supabase
-      .from("pendaftar")
-      .select("referral")
-      .eq("referral", p.pendaftar_id);
+      const referralCount = {};
 
-    referralCount[p.pendaftar_id] = referred.length;
-  }
+      for (const p of data) {
+        const { data: referred } = await supabase
+          .from("pendaftar")
+          .select("referral")
+          .eq("referral", p.pendaftar_id);
 
-  const ranked = data
-    .map(p => ({
-      nama: p.nama,
-      pendaftar_id: p.pendaftar_id,
-      count: referralCount[p.pendaftar_id] || 0
-    }))
-    .sort((a, b) => b.count - a.count);
+        referralCount[p.pendaftar_id] = referred.length;
+      }
 
-  tableBody.innerHTML = ranked.map((r, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${r.nama}</td>
-      <td>${r.pendaftar_id}</td>
-      <td>${r.count}</td>
-    </tr>
-  `).join("");
-});
+      const ranked = data
+        .map(p => ({
+          nama: p.nama,
+          pendaftar_id: p.pendaftar_id,
+          count: referralCount[p.pendaftar_id] || 0
+        }))
+        .sort((a, b) => b.count - a.count);
 
+      tableBody.innerHTML = ranked.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.nama}</td>
+          <td>${r.pendaftar_id}</td>
+          <td>${r.count}</td>
+        </tr>
+      `).join("");
+    });
+
+    // Fungsi Log Keluar
+    window.logout = function () {
+      localStorage.removeItem("pendaftarID");
+      localStorage.removeItem("userNama");
+      window.location.href = "login.html";
+    };
   </script>
+
   <style>
     body { font-family: Arial; text-align: center; margin-top: 40px; }
     table { margin: auto; border-collapse: collapse; width: 90%; }
     th, td { border: 1px solid #aaa; padding: 10px; }
     th { background-color: purple; color: white; }
+    button {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: crimson;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>  <h3>Top Referral Ranking</h3>
+  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
+
+  <h3>Top Referral Ranking</h3>
   <table>
     <thead>
       <tr>
@@ -81,5 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <tr><td colspan="4">Loading...</td></tr>
     </tbody>
   </table>
+
+  <button onclick="logout()">Log Keluar</button>
 </body>
 </html>
