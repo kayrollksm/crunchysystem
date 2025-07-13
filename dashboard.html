@@ -1,30 +1,46 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Dashboard Referral</title>
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
+    // Connect ke Supabase
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
+    const supabaseKey = "***REMOVED***
+";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const tableBody = document.getElementById("referral-body");
+    // Sekat jika tak login
+    const pendaftarID = localStorage.getItem("pendaftarID");
+    const userNama = localStorage.getItem("userNama");
 
-    async function fetchData() {
-      const { data, error } = await supabase.from("pendaftar").select("nama,pendaftar_id");
+    if (!pendaftarID) {
+      window.location.href = "login.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("user-nama").innerText = userNama;
+      document.getElementById("user-id").innerText = pendaftarID;
+
+      const tableBody = document.getElementById("referral-body");
+
+      const { data, error } = await supabase
+        .from("pendaftar")
+        .select("nama,pendaftar_id");
+
       if (error) return alert("Gagal ambil data utama: " + error.message);
 
       const referralCount = {};
 
-      for (const pendaftar of data) {
+      for (const p of data) {
         const { data: referred } = await supabase
           .from("pendaftar")
           .select("referral")
-          .eq("referral", pendaftar.pendaftar_id);
+          .eq("referral", p.pendaftar_id);
 
-        referralCount[pendaftar.pendaftar_id] = referred.length;
+        referralCount[p.pendaftar_id] = referred.length;
       }
 
       const ranked = data
@@ -43,19 +59,20 @@
           <td>${r.count}</td>
         </tr>
       `).join("");
-    }
-
-    fetchData();
+    });
   </script>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    body { font-family: Arial; text-align: center; margin-top: 40px; }
     table { margin: auto; border-collapse: collapse; width: 90%; }
     th, td { border: 1px solid #aaa; padding: 10px; }
     th { background-color: purple; color: white; }
   </style>
 </head>
 <body>
-  <h2>Top Referral Ranking</h2>
+  <h2>Dashboard Referral</h2>
+  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
+
+  <h3>Top Referral Ranking</h3>
   <table>
     <thead>
       <tr>
