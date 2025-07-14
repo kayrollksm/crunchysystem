@@ -13,24 +13,31 @@
     <p class="text-gray-700 mb-2">Pendaftaran anda telah berjaya.</p>
     
     <p class="text-sm text-gray-500">ID Pendaftar anda:</p>
-    <p id="pendaftar-id" class="text-xl font-bold text-rose-700 mb-4">MCxxxxxA</p>
+    <p id="pendaftar-id" class="text-xl font-bold text-rose-700 mb-4">-</p>
 
     <div class="mb-4">
       <p class="text-sm text-gray-500 mb-1">Link Referral anda:</p>
-      <div class="flex items-center justify-center gap-2">
-        <input id="referral-link" class="w-full px-3 py-2 border rounded-xl text-sm" readonly />
+      <div class="flex items-center gap-2">
+        <input id="referral-link" class="flex-1 px-3 py-2 border rounded-xl text-sm" readonly />
         <button onclick="copyLink()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm">Copy</button>
       </div>
     </div>
 
+    <div class="mb-4">
+      <button onclick="shareWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm">
+        Kongsi di WhatsApp
+      </button>
+    </div>
+
     <button onclick="window.location.href='dashboard.html'"
-      class="mt-4 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-sm transition">
+      class="mt-2 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-sm transition">
       Pergi ke Dashboard
     </button>
   </div>
 
   <script>
     const id = localStorage.getItem("pendaftar_id");
+    const nama = localStorage.getItem("nama");
     const link = `${window.location.origin}/register.html?ref=${id}`;
 
     document.getElementById("pendaftar-id").textContent = id ?? "-";
@@ -41,7 +48,13 @@
       copyText.select();
       copyText.setSelectionRange(0, 99999);
       document.execCommand("copy");
-      alert("Link berjaya disalin!");
+      alert("✅ Link berjaya disalin!");
+    }
+
+    function shareWhatsApp() {
+      const text = `Saya dah daftar CrunchySystem! Jom daftar guna referral saya (${nama ?? ""}): ${link}`;
+      const waURL = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(waURL, "_blank");
     }
   </script>
 </body>
