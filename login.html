@@ -10,45 +10,50 @@
     const supabaseKey = "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const form = document.getElementById("loginForm");
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("loginForm");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = form.email.value.trim();
-      const id = form.pendaftar_id.value.trim().toUpperCase();
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("*")
-        .eq("email", email)
-        .eq("pendaftar_id", id)
-        .maybeSingle();
+        const email = form.email.value.trim();
+        const pendaftar_id = form.pendaftar_id.value.trim();
 
-      if (error || !data) {
-        alert("Login gagal. Sila semak semula email dan ID anda.");
-        return;
-      }
+        const { data, error } = await supabase
+          .from("pendaftar")
+          .select("*")
+          .eq("email", email)
+          .eq("pendaftar_id", pendaftar_id);
 
-      // Simpan info dalam localStorage
-      localStorage.setItem("pendaftarID", data.pendaftar_id);
-      localStorage.setItem("userNama", data.nama);
+        if (error) {
+          alert("Ralat semasa login: " + error.message);
+          return;
+        }
 
-      // Redirect ke dashboard
-      window.location.href = "dashboard.html";
+        if (data && data.length > 0) {
+          const user = data[0];
+          localStorage.setItem("pendaftarID", user.pendaftar_id);
+          localStorage.setItem("email", user.email);
+          localStorage.setItem("userNama", user.nama);
+          window.location.href = "dashboard.html";
+        } else {
+          alert("Login gagal: ID atau email tidak sah.");
+        }
+      });
     });
   </script>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    input { display: block; margin: 10px auto; padding: 10px; width: 300px; }
-    button { padding: 10px 30px; background-color: green; color: white; border: none; cursor: pointer; }
+    body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
+    input { margin: 10px 0; padding: 10px; width: 300px; }
+    button { padding: 10px 30px; background-color: purple; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>Login ke Dashboard</h2>
+  <h2>Login Pengguna</h2>
   <form id="loginForm">
-    <input type="email" name="email" placeholder="Email anda" required />
-    <input type="text" name="pendaftar_id" placeholder="ID Pendaftar (Contoh: MC12345A)" required />
-    <button type="submit">Login</button>
+    <input type="email" id="email" placeholder="Email" required /><br />
+    <input type="text" id="pendaftar_id" placeholder="ID Pendaftar" required /><br />
+    <button type="submit">Log Masuk</button>
   </form>
 </body>
 </html>
