@@ -10,7 +10,6 @@
     const supabaseKey = "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Sekat jika tak login
     const pendaftarID = localStorage.getItem("pendaftarID");
     const userNama = localStorage.getItem("userNama");
 
@@ -22,6 +21,11 @@
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
+      await fetchTopReferrers();
+      await fetchReferralSendiri();
+    });
+
+    async function fetchTopReferrers() {
       const tableBody = document.getElementById("referral-body");
 
       const { data, error } = await supabase
@@ -37,7 +41,6 @@
           .from("pendaftar")
           .select("referral")
           .eq("referral", p.pendaftar_id);
-
         referralCount[p.pendaftar_id] = referred.length;
       }
 
@@ -47,7 +50,8 @@
           pendaftar_id: p.pendaftar_id,
           count: referralCount[p.pendaftar_id] || 0
         }))
-        .sort((a, b) => b.count - a.count);
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
 
       tableBody.innerHTML = ranked.map((r, i) => `
         <tr>
@@ -57,51 +61,60 @@
           <td>${r.count}</td>
         </tr>
       `).join("");
-    });
+    }
 
-    // Fungsi Log Keluar
-    window.logout = function () {
-      localStorage.removeItem("pendaftarID");
-      localStorage.removeItem("userNama");
-      window.location.href = "login.html";
-    };
+    async function fetchReferralSendiri() {
+      const { data, error } = await supabase
+        .from("pendaftar")
+        .select("nama, pendaftar_id")
+        .eq("referral", pendaftarID);
+
+      const list = document.getElementById("referral-list");
+
+      if (error || !data.length) {
+        list.innerHTML = "<li>Tiada referral lagi.</li>";
+        return;
+      }
+
+      list.innerHTML = data.map(p => `<li>${p.nama} (${p.pendaftar_id})</li>`).join("");
+    }
   </script>
 
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 40px; }
-    table { margin: auto; border-collapse: collapse; width: 90%; }
+    body { font-family: Arial, sans-serif; padding: 30px; background: #f7f7f7; text-align: center; }
+    h2, h3 { color: #4B0082; }
+    table { width: 90%; margin: 20px auto; border-collapse: collapse; }
     th, td { border: 1px solid #aaa; padding: 10px; }
     th { background-color: purple; color: white; }
-    button {
-      margin-top: 30px;
-      padding: 10px 20px;
-      background-color: crimson;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+    ul { list-style: none; padding: 0; }
+    li { padding: 6px 0; }
+    hr { margin: 30px 0; }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
+  <p>Selamat datang, <b><span id="user-nama"></span></b>!<br>ID anda: <b><span id="user-id"></span></b></p>
 
-  <h3>Top Referral Ranking</h3>
+  <hr>
+
+  <h3>Referral Saya</h3>
+  <ul id="referral-list">Loading...</ul>
+
+  <hr>
+
+  <h3>Top 10 Referral Ranking</h3>
   <table>
     <thead>
       <tr>
         <th>Rank</th>
         <th>Nama</th>
-        <th>ID Pendaftar</th>
-        <th>Jumlah Referral</th>
+        <th>ID</th>
+        <th>Referral</th>
       </tr>
     </thead>
     <tbody id="referral-body">
       <tr><td colspan="4">Loading...</td></tr>
     </tbody>
   </table>
-
-  <button onclick="logout()">Log Keluar</button>
 </body>
 </html>
