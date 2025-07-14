@@ -2,15 +2,31 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="5; url=register.html" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background: #fff0f3;
+      color: #a70027;
+    }
+  </style>
+</head>
+<body>
+  <h2>Sedang mengalihkan ke halaman pendaftaran...</h2>
+  <p>Jika tidak dialihkan dalam beberapa saat, klik <a href="register.html">di sini</a>.</p>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
     const target = ref ? `register.html?ref=${ref}` : "register.html";
-    window.location.href = target;
+
+    setTimeout(() => {
+      window.location.href = target;
+    }, 100);
   </script>
-</head>
-<body>
-  <p>Sedang mengalihkan ke halaman pendaftaran...</p>
 </body>
 </html>
