@@ -1,77 +1,45 @@
-<!DOCTYPE html><html lang="ms"><head>
+<!DOCTYPE html>
+<html lang="ms">
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Anda</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #fff;
-      color: #000;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }.dashboard-title {
-  color: #800020;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2 class="title">Dashboard Anda</h2>
+    <p>Nama: <span id="display-nama">ID</span></p>
+    <p>Jumlah Jualan: <span id="display-jualan">Loading...</span></p>
+    <p>Jumlah Referral: <span id="display-referral">Loading...</span></p>
+    <p>Tier Semasa: <span id="display-tier">Loading...</span></p>
+    <p>Komisen: <span id="display-komisen">Loading...</span></p>
+    <p>Override Komisen: <span id="display-override">Loading...</span></p>
 
-.info {
-  text-align: center;
-  margin-bottom: 30px;
-}
+    <div class="button-group">
+      <a href="thank.html" class="btn">Ke Halaman Terima Kasih</a>
+      <a href="pembelian.html" class="btn">Pembelian</a>
+      <button onclick="logout()" class="btn btn-red">Logout</button>
+    </div>
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+    <h3 class="sub-title">Top Referral Ranking</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Nama</th>
+          <th>ID</th>
+          <th>Referral</th>
+          <th>Jualan</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-table">
+        <tr><td colspan="5">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
-}
-
-th {
-  background-color: #800020;
-  color: #fff;
-}
-
-.loading {
-  font-style: italic;
-  color: #555;
-}
-
-.btn-dashboard {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-  </style>
-</head><body>
-  <h2 class="dashboard-title">Dashboard Anda</h2>  <div class="info">
-    <p>Nama: <span id="nama"></span> | ID: <strong id="idPendaftar"></strong></p>
-    <p>Jumlah Jualan: <span id="jumlahJualan">Loading...</span></p>
-    <p>Jumlah Referral: <span id="jumlahReferral">Loading...</span></p>
-    <p>Tier Semasa: <span id="tierSemasa">Loading...</span></p>
-    <p>Komisen: <span id="komisen">Loading...</span></p>
-    <p>Override Komisen: <span id="override">Loading...</span></p>
-  </div>  <div class="btn-dashboard">
-    <a href="thank.html" class="btn btn-outline-danger">Ke Halaman Terima Kasih</a>
-  </div>  <h4 class="text-center mt-4">Top Referral Ranking</h4>
-  <table class="table table-bordered mt-3">
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Nama</th>
-        <th>ID</th>
-        <th>Referral</th>
-        <th>Jualan</th>
-        <th>Tier</th>
-      </tr>
-    </thead>
-    <tbody id="referralTable">
-      <tr><td colspan="6" class="loading">Loading...</td></tr>
-    </tbody>
-  </table>  <script src="./scripts/dashboard.js"></script></body></html>
+  <script src="supabase.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
