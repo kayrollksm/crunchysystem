@@ -7,9 +7,11 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
+    const supabaseKey =
+      "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Semak login
     const pendaftarID = localStorage.getItem("pendaftarID");
     const userNama = localStorage.getItem("userNama");
 
@@ -21,141 +23,117 @@
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
+      const tableBody = document.getElementById("referral-body");
+
       const { data, error } = await supabase
         .from("pendaftar")
-        .select("nama, pendaftar_id, referral");
+        .select("nama,pendaftar_id");
 
-      if (error) return alert("Gagal ambil data: " + error.message);
-
-      const referralCount = {};
-      const myID = pendaftarID;
-      let myTotal = 0;
-
-      for (const p of data) {
-        const id = p.pendaftar_id;
-        const ref = p.referral;
-
-        if (ref) {
-          referralCount[ref] = (referralCount[ref] || 0) + 1;
-          if (ref === myID) myTotal++;
-        }
+      if (error) {
+        alert("Gagal ambil data: " + error.message);
+        return;
       }
 
-      // Top 10
+      const referralCount = {};
+
+      for (const p of data) {
+        const { data: referred } = await supabase
+          .from("pendaftar")
+          .select("referral")
+          .eq("referral", p.pendaftar_id);
+
+        referralCount[p.pendaftar_id] = referred.length;
+      }
+
       const ranked = data
-        .filter(p => p.pendaftar_id)
-        .map(p => ({
+        .map((p) => ({
           nama: p.nama,
           pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0
+          count: referralCount[p.pendaftar_id] || 0,
         }))
         .sort((a, b) => b.count - a.count);
 
-      document.getElementById("referral-body").innerHTML = ranked.slice(0, 10).map((r, i) => `
+      tableBody.innerHTML = ranked
+        .map(
+          (r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${r.nama}</td>
           <td>${r.pendaftar_id}</td>
           <td>${r.count}</td>
         </tr>
-      `).join("");
-
-      // Statistik Saya
-      document.getElementById("statistik").innerHTML = `
-        <div class="box">
-          <p>Jumlah Referral Anda: <b>${myTotal}</b></p>
-          <p>Link Referral: <span id="my-referral-link">https://kayrollksm.github.io/crunchysystem/?ref=${myID}</span></p>
-          <button onclick="copyLink()">Salin Link</button>
-        </div>
-      `;
+      `
+        )
+        .join("");
     });
 
-    // Copy Function
-    window.copyLink = () => {
-      const link = document.getElementById("my-referral-link").innerText;
-      navigator.clipboard.writeText(link).then(() => {
-        alert("Link berjaya disalin!");
+    // Fungsi logout
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutBtn = document.getElementById("logout-btn");
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("pendaftarID");
+        localStorage.removeItem("userNama");
+        window.location.href = "login.html";
       });
-    };
-
-    // Tab Function
-    window.showTab = (tab) => {
-      document.getElementById("top10").style.display = tab === 'top10' ? 'block' : 'none';
-      document.getElementById("statistik").style.display = tab === 'statistik' ? 'block' : 'none';
-    };
+    });
   </script>
+
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; background: #fefefe; }
-    h2 { margin-bottom: 5px; }
-    .tabs button {
-      margin: 5px;
-      padding: 8px 16px;
-      border: none;
-      cursor: pointer;
-      background-color: purple;
-      color: white;
-      border-radius: 5px;
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 40px;
     }
-    .tabs button.inactive {
-      background-color: #ddd;
-      color: #333;
-    }
+
     table {
       margin: auto;
       border-collapse: collapse;
       width: 90%;
-      margin-top: 20px;
     }
-    th, td {
+
+    th,
+    td {
       border: 1px solid #aaa;
       padding: 10px;
     }
+
     th {
       background-color: purple;
       color: white;
     }
-    #statistik {
-      margin-top: 20px;
-    }
-    .box {
-      border: 1px solid #999;
-      width: 90%;
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-      background: #fafafa;
-      border-radius: 10px;
+
+    #logout-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
+  <p>
+    Selamat datang, <b><span id="user-nama"></span></b>! ID anda:
+    <b><span id="user-id"></span></b>
+  </p>
 
-  <div class="tabs">
-    <button onclick="showTab('top10')">Top 10 Referral</button>
-    <button onclick="showTab('statistik')">Statistik Saya</button>
-  </div>
+  <h3>Top Referral Ranking</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Nama</th>
+        <th>ID Pendaftar</th>
+        <th>Jumlah Referral</th>
+      </tr>
+    </thead>
+    <tbody id="referral-body">
+      <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
 
-  <div id="top10">
-    <h3>Top Referral Ranking</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Nama</th>
-          <th>ID Pendaftar</th>
-          <th>Jumlah Referral</th>
-        </tr>
-      </thead>
-      <tbody id="referral-body">
-        <tr><td colspan="4">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div id="statistik" style="display: none;">
-    <p>Statistik anda akan ditambah di sini nanti.</p>
-  </div>
+  <button id="logout-btn">Log Keluar</button>
 </body>
 </html>
