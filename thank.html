@@ -1,35 +1,48 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <title>Terima Kasih</title>
-  <style>
-    body { font-family: Arial; text-align: center; margin-top: 40px; }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: purple;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terima Kasih - CrunchySystem</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Terima kasih kerana mendaftar!</h2>
-  <p>ID Pendaftar anda: <b><span id="idPendaftar"></span></b></p>
-  <p>Link Referral anda: <b><span id="referral-link"></span></b></p>
+<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">
 
-  <button id="toDashboard">Pergi ke Dashboard</button>
+  <div class="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-rose-200 text-center">
+    <h2 class="text-2xl font-bold text-rose-600 mb-4">Terima Kasih!</h2>
+    <p class="text-gray-700 mb-2">Pendaftaran anda telah berjaya.</p>
+    
+    <p class="text-sm text-gray-500">ID Pendaftar anda:</p>
+    <p id="pendaftar-id" class="text-xl font-bold text-rose-700 mb-4">MCxxxxxA</p>
+
+    <div class="mb-4">
+      <p class="text-sm text-gray-500 mb-1">Link Referral anda:</p>
+      <div class="flex items-center justify-center gap-2">
+        <input id="referral-link" class="w-full px-3 py-2 border rounded-xl text-sm" readonly />
+        <button onclick="copyLink()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm">Copy</button>
+      </div>
+    </div>
+
+    <button onclick="window.location.href='dashboard.html'"
+      class="mt-4 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-sm transition">
+      Pergi ke Dashboard
+    </button>
+  </div>
 
   <script>
-    const id = localStorage.getItem("pendaftarID");
-    document.getElementById("idPendaftar").innerText = id || '—';
-    document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${id}`;
+    const id = localStorage.getItem("pendaftar_id");
+    const link = `${window.location.origin}/register.html?ref=${id}`;
 
-    document.getElementById("toDashboard").addEventListener("click", () => {
-      window.location.href = 'dashboard.html';
-    });
+    document.getElementById("pendaftar-id").textContent = id ?? "-";
+    document.getElementById("referral-link").value = link;
+
+    function copyLink() {
+      const copyText = document.getElementById("referral-link");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Link berjaya disalin!");
+    }
   </script>
 </body>
 </html>
