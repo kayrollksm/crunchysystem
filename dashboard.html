@@ -1,91 +1,125 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="ms">
+<head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Anda</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-</head><body>
-  <div class="container">
-    <h2 style="color: purple;">Dashboard Anda</h2>
-    <p>Nama: <strong id="user-name">Loading...</strong> | ID: <strong id="user-id">Loading...</strong></p>
-    <p>Jumlah Jualan: <span id="total-jualan">Loading...</span></p>
-    <p>Jumlah Referral: <span id="total-referral">Loading...</span></p>
-    <p>Tier Semasa: <span id="tier">Loading...</span></p>
-    <p>Komisen: <span id="komisen">Loading...</span></p>
-    <p>Override Komisen: <span id="override">Loading...</span></p><h3>Simulasi Pembelian</h3>
-<form id="purchase-form">
-  <label for="quantity">Jumlah Unit (RM15 setiap satu):</label><br>
-  <input type="number" id="quantity" name="quantity" min="1" required>
-  <button type="submit">Tambah Pembelian</button>
-</form>
-<p id="purchase-status"></p>
+  <title>Dashboard Referral</title>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+const supabaseKey = "***REMOVED***";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-<br>
-<button onclick="logout()">Log Keluar</button>
+const pendaftarID = localStorage.getItem("pendaftarID");
+const userNama = localStorage.getItem("userNama");
 
-  </div>  <script>
-    const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_PUBLIC_ANON_KEY';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+if (!pendaftarID) {
+  window.location.href = "login.html";
+}
 
-    const currentUserId = sessionStorage.getItem('pendaftar_id');
+async function fetchData() {
+  document.getElementById("user-nama").innerText = userNama;
+  document.getElementById("user-id").innerText = pendaftarID;
 
-    async function getStatistik() {
-      const { data, error } = await supabase
-        .from('pendaftar')
-        .select('*')
-        .eq('pendaftar_id', currentUserId)
-        .single();
+  const { data, error } = await supabase.from("pendaftar").select("nama,pendaftar_id,referral,jualan");
+  if (error) {
+    alert("Gagal ambil data: " + error.message);
+    return;
+  }
 
-      if (error || !data) return;
+  const referralMap = {};
+  const jualanMap = {};
 
-      document.getElementById('user-name').textContent = data.nama;
-      document.getElementById('user-id').textContent = data.pendaftar_id;
-      document.getElementById('total-jualan').textContent = 'RM' + (data.jumlah_jualan || 0);
-      document.getElementById('total-referral').textContent = data.jumlah_referral || 0;
-
-      const jualan = data.jumlah_jualan || 0;
-      const referral = data.jumlah_referral || 0;
-      let tier = '1';
-      let komisen = '10%';
-      let override = '-';
-
-      if (jualan >= 10000 && referral >= 10) {
-        tier = '5'; komisen = '20%'; override = 'Ya';
-      } else if (jualan >= 8000 && referral >= 5) {
-        tier = '4'; komisen = '18%'; override = 'Ya';
-      } else if (jualan >= 5000 && referral >= 3) {
-        tier = '3'; komisen = '15%'; override = 'Ya';
-      } else if (jualan >= 3000) {
-        tier = '2'; komisen = '13%'; override = '-';
-      }
-
-      document.getElementById('tier').textContent = tier;
-      document.getElementById('komisen').textContent = komisen;
-      document.getElementById('override').textContent = override;
+  for (const p of data) {
+    if (!referralMap[p.referral]) {
+      referralMap[p.referral] = [];
     }
+    referralMap[p.referral].push(p);
 
-    getStatistik();
+    if (!jualanMap[p.pendaftar_id]) jualanMap[p.pendaftar_id] = 0;
+    if (p.jualan) jualanMap[p.pendaftar_id] += p.jualan;
+  }
 
-    document.getElementById('purchase-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const quantity = parseInt(document.getElementById('quantity').value);
-      const amount = quantity * 15;
+  const tableBody = document.getElementById("referral-body");
 
-      const { data, error } = await supabase
-        .rpc('tambah_jualan', { pendaftar_id_input: currentUserId, jumlah_tambah: amount });
+  const userData = data.map(p => {
+    const referralCount = referralMap[p.pendaftar_id]?.length || 0;
+    const totalJualan = jualanMap[p.pendaftar_id] || 0;
 
-      if (error) {
-        document.getElementById('purchase-status').textContent = 'Gagal tambah pembelian.';
-      } else {
-        document.getElementById('purchase-status').textContent = `Berjaya tambah RM${amount}`;
-        getStatistik();
-        document.getElementById('quantity').value = '';
-      }
-    });
+    let tier = 1;
+    if (totalJualan >= 10000 && referralCount >= 10) tier = 5;
+    else if (totalJualan >= 8000 && referralCount >= 5) tier = 4;
+    else if (totalJualan >= 5000 && referralCount >= 3) tier = 3;
+    else if (totalJualan >= 3000) tier = 2;
 
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = 'login.html';
-    }
-  </script></body></html>
+    return {
+      nama: p.nama,
+      pendaftar_id: p.pendaftar_id,
+      referral: referralCount,
+      jualan: totalJualan,
+      tier
+    };
+  });
+
+  userData.sort((a, b) => b.referral - a.referral);
+
+  tableBody.innerHTML = userData.map((u, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${u.nama}</td>
+      <td>${u.pendaftar_id}</td>
+      <td>${u.referral}</td>
+      <td>RM${u.jualan}</td>
+      <td>Tier ${u.tier}</td>
+      <td><button onclick="copyLink('${u.pendaftar_id}')">Copy Link</button></td>
+    </tr>
+  `).join("");
+}
+
+window.copyLink = (id) => {
+  const fullLink = `https://kayrollksm.github.io/crunchysystem/?ref=${id}`;
+  navigator.clipboard.writeText(fullLink).then(() => {
+    alert("Link berjaya disalin: " + fullLink);
+  });
+};
+
+window.logout = () => {
+  localStorage.removeItem("pendaftarID");
+  localStorage.removeItem("userNama");
+  window.location.href = "login.html";
+};
+
+fetchData();
+
+  </script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; text-align: center; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 10px; }
+    th { background-color: purple; color: white; }
+    button { padding: 5px 10px; background: purple; color: white; border: none; cursor: pointer; }
+    .top-bar { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      Selamat datang <b><span id="user-nama"></span></b> | ID: <b><span id="user-id"></span></b>
+    </div>
+    <button onclick="logout()">Logout</button>
+  </div>  <h2>Dashboard Referral</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Nama</th>
+        <th>ID</th>
+        <th>Referral</th>
+        <th>Jualan</th>
+        <th>Tier</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody id="referral-body">
+      <tr><td colspan="7">Loading...</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
