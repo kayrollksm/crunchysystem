@@ -11,7 +11,6 @@
       "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Semak login
     const pendaftarID = localStorage.getItem("pendaftarID");
     const userNama = localStorage.getItem("userNama");
 
@@ -23,16 +22,33 @@
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
+      const tabReferral = document.getElementById("tab-referral");
+      const tabStatistik = document.getElementById("tab-statistik");
+      const contentReferral = document.getElementById("referral-section");
+      const contentStatistik = document.getElementById("statistik-section");
+
+      tabReferral.onclick = () => {
+        contentReferral.style.display = "block";
+        contentStatistik.style.display = "none";
+        tabReferral.classList.add("active");
+        tabStatistik.classList.remove("active");
+      };
+
+      tabStatistik.onclick = () => {
+        contentReferral.style.display = "none";
+        contentStatistik.style.display = "block";
+        tabReferral.classList.remove("active");
+        tabStatistik.classList.add("active");
+      };
+
+      // Load data ranking
       const tableBody = document.getElementById("referral-body");
 
       const { data, error } = await supabase
         .from("pendaftar")
         .select("nama,pendaftar_id");
 
-      if (error) {
-        alert("Gagal ambil data: " + error.message);
-        return;
-      }
+      if (error) return alert("Gagal ambil data utama: " + error.message);
 
       const referralCount = {};
 
@@ -41,7 +57,6 @@
           .from("pendaftar")
           .select("referral")
           .eq("referral", p.pendaftar_id);
-
         referralCount[p.pendaftar_id] = referred.length;
       }
 
@@ -51,7 +66,8 @@
           pendaftar_id: p.pendaftar_id,
           count: referralCount[p.pendaftar_id] || 0,
         }))
-        .sort((a, b) => b.count - a.count);
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
 
       tableBody.innerHTML = ranked
         .map(
@@ -61,26 +77,22 @@
           <td>${r.nama}</td>
           <td>${r.pendaftar_id}</td>
           <td>${r.count}</td>
-        </tr>
-      `
+        </tr>`
         )
         .join("");
-    });
 
-    // Fungsi logout
-    document.addEventListener("DOMContentLoaded", () => {
-      const logoutBtn = document.getElementById("logout-btn");
-      logoutBtn.addEventListener("click", () => {
+      // Logout
+      document.getElementById("logout-btn").onclick = () => {
         localStorage.removeItem("pendaftarID");
         localStorage.removeItem("userNama");
         window.location.href = "login.html";
-      });
+      };
     });
   </script>
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       margin-top: 40px;
     }
@@ -102,6 +114,18 @@
       color: white;
     }
 
+    .tab {
+      margin: 20px 5px;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .active {
+      background-color: purple;
+      color: white;
+    }
+
     #logout-btn {
       margin-top: 30px;
       padding: 10px 20px;
@@ -112,6 +136,7 @@
     }
   </style>
 </head>
+
 <body>
   <h2>Dashboard Referral</h2>
   <p>
@@ -119,20 +144,29 @@
     <b><span id="user-id"></span></b>
   </p>
 
-  <h3>Top Referral Ranking</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Nama</th>
-        <th>ID Pendaftar</th>
-        <th>Jumlah Referral</th>
-      </tr>
-    </thead>
-    <tbody id="referral-body">
-      <tr><td colspan="4">Loading...</td></tr>
-    </tbody>
-  </table>
+  <button id="tab-referral" class="tab active">Top 10 Referral</button>
+  <button id="tab-statistik" class="tab">Statistik Saya</button>
+
+  <div id="referral-section">
+    <h3>Top Referral Ranking</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Nama</th>
+          <th>ID Pendaftar</th>
+          <th>Jumlah Referral</th>
+        </tr>
+      </thead>
+      <tbody id="referral-body">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="statistik-section" style="display: none;">
+    <p>Statistik anda akan ditambah di sini nanti.</p>
+  </div>
 
   <button id="logout-btn">Log Keluar</button>
 </body>
