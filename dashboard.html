@@ -1,118 +1,170 @@
-<!DOCTYPE html><html lang="ms">
+<!DOCTYPE html>
+<html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Referral</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+    const supabaseKey = "***REMOVED***";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const pendaftarID = localStorage.getItem("pendaftarID");
+    const userNama = localStorage.getItem("userNama");
+
+    // ✅ Redirect ke login kalau belum login
+    if (!pendaftarID) {
+      window.location.href = "login.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("user-nama").innerText = userNama;
+      document.getElementById("user-id").innerText = pendaftarID;
+      document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`;
+
+      // Copy link
+      document.getElementById("copy-link").addEventListener("click", () => {
+        navigator.clipboard.writeText(`https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`);
+        alert("Link berjaya disalin!");
+      });
+
+      // Logout
+      document.getElementById("logout").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "login.html";
+      });
+
+      // Simulasi pembelian
+      document.getElementById("beli-button").addEventListener("click", async () => {
+        const jumlah = parseInt(document.getElementById("jumlah-botol").value);
+        const totalRM = jumlah * 15;
+
+        const { error } = await supabase
+          .from("pendaftar")
+          .update({ jumlah_beli: jumlah, jumlah_rmsale: totalRM })
+          .eq("pendaftar_id", pendaftarID);
+
+        if (error) {
+          alert("Gagal kemaskini jualan");
+        } else {
+          alert("Jualan disimpan!");
+          window.location.reload();
+        }
+      });
+
+      // Dapatkan semua data
+      const { data, error } = await supabase
+        .from("pendaftar")
+        .select("nama,pendaftar_id,referral,jumlah_rmsale");
+
+      if (error) return alert("Gagal ambil data: " + error.message);
+
+      const referralCount = {};
+      data.forEach(p => {
+        if (p.referral) {
+          referralCount[p.referral] = (referralCount[p.referral] || 0) + 1;
+        }
+      });
+
+      // Kira sendiri
+      const current = data.find(d => d.pendaftar_id === pendaftarID);
+      const jumlahReferral = referralCount[pendaftarID] || 0;
+      const totalSale = current?.jumlah_rmsale || 0;
+      let tier = 1;
+      let komisen = "10%";
+      let note = "Tiada override";
+
+      if (totalSale >= 3000) {
+        tier = 2;
+        komisen = "13%";
+      }
+      if (totalSale >= 5000 && jumlahReferral >= 3) {
+        tier = 3;
+        komisen = "15% + override";
+        note = "Layak override";
+      }
+      if (totalSale >= 8000 && jumlahReferral >= 5) {
+        tier = 4;
+        komisen = "18% + override";
+      }
+      if (totalSale >= 10000 && jumlahReferral >= 10) {
+        tier = 5;
+        komisen = "20% + override";
+      }
+
+      document.getElementById("total-sale").innerText = `RM${totalSale}`;
+      document.getElementById("total-referral").innerText = jumlahReferral;
+      document.getElementById("current-tier").innerText = `Tier ${tier}`;
+      document.getElementById("komisen-info").innerText = komisen;
+      document.getElementById("note-info").innerText = note;
+
+      // Ranking
+      const tableBody = document.getElementById("referral-body");
+      const ranked = data
+        .map(p => ({
+          nama: p.nama,
+          pendaftar_id: p.pendaftar_id,
+          count: referralCount[p.pendaftar_id] || 0
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      tableBody.innerHTML = ranked.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.nama}</td>
+          <td>${r.pendaftar_id}</td>
+          <td>${r.count}</td>
+        </tr>
+      `).join("");
+    });
+  </script>
   <style>
-    body { padding: 20px; font-family: Arial, sans-serif; }
-    .btn-custom { margin-right: 5px; }
-    .highlight { color: purple; font-weight: bold; }
+    body { font-family: Arial; padding: 30px; }
+    .card { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #aaa; padding: 10px; text-align: center; }
+    th { background-color: purple; color: white; }
+    button { padding: 10px 20px; background-color: purple; color: white; border: none; cursor: pointer; border-radius: 6px; }
+    input { padding: 8px; width: 80px; }
   </style>
 </head>
 <body>
-  <div class="container text-center">
-    <p>Selamat datang <span class="highlight" id="user-name"></span> | ID: <span class="highlight" id="user-id"></span></p>
-    <h3 class="mb-4">Dashboard Referral</h3><div class="table-responsive">
-  <table class="table table-bordered">
-    <thead class="table-dark">
-      <tr>
-        <th>Rank</th>
-        <th>Nama</th>
-        <th>ID</th>
-        <th>Referral</th>
-        <th>Jualan</th>
-        <th>Tier</th>
-        <th>Komisen</th>
-        <th>Override</th>
-      </tr>
-    </thead>
-    <tbody id="ranking-table">
-      <tr><td colspan="8">Loading...</td></tr>
-    </tbody>
-  </table>
-</div>
+  <h2>Dashboard Referral</h2>
+  <p>Selamat datang, <b><span id="user-nama"></span></b> | ID: <b><span id="user-id"></span></b></p>
+  <p>Referral Link: <span id="referral-link"></span> <button id="copy-link">Copy</button></p>
+  <p><button id="logout">Logout</button></p>
 
-<button class="btn btn-danger" onclick="logout()">Log Keluar</button>
+  <div class="card">
+    <h3>Status Anda</h3>
+    <p>Jualan Terkumpul: <b><span id="total-sale">RM0</span></b></p>
+    <p>Jumlah Referral: <b><span id="total-referral">0</span></b></p>
+    <p>Tier Semasa: <b><span id="current-tier">Tier 1</span></b></p>
+    <p>Komisen: <b><span id="komisen-info">10%</span></b></p>
+    <p><i><span id="note-info">Tiada override</span></i></p>
+  </div>
 
-  </div>  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  <div class="card">
+    <h3>Simulasi Pembelian</h3>
+    <input type="number" id="jumlah-botol" value="1" min="1" />
+    <button id="beli-button">Beli (RM15 setiap satu)</button>
+  </div>
 
-    const supabaseUrl = 'https://xyzcompany.supabase.co'; // GANTI DENGAN URL PROJECT KAU
-    const supabaseKey = 'YOUR_SUPABASE_API_KEY'; // GANTI DENGAN KEY KAU
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const userData = JSON.parse(localStorage.getItem('user'));
-    if (!userData) window.location.href = 'index.html';
-
-    document.getElementById('user-name').textContent = userData.name;
-    document.getElementById('user-id').textContent = userData.pendaftar_id;
-
-    const komisenByTier = {
-      1: 10,
-      2: 13,
-      3: 15,
-      4: 18,
-      5: 20
-    };
-
-    async function getDashboardData() {
-      const { data: allPendaftar, error } = await supabase.from('pendaftar').select('*');
-      if (error) return alert('Gagal ambil data pendaftar.');
-
-      const { data: allJualan } = await supabase.from('jualan').select('*');
-
-      const userId = userData.pendaftar_id;
-      const userJualan = allJualan.filter(j => j.pendaftar_id === userId);
-      const userReferral = allPendaftar.filter(p => p.referral === userId);
-
-      const jumlahJualan = userJualan.reduce((sum, j) => sum + j.jumlah, 0);
-      const jumlahReferral = userReferral.length;
-
-      let tier = 1;
-      if (jumlahJualan >= 10000 && jumlahReferral >= 10) tier = 5;
-      else if (jumlahJualan >= 8000 && jumlahReferral >= 5) tier = 4;
-      else if (jumlahJualan >= 5000 && jumlahReferral >= 3) tier = 3;
-      else if (jumlahJualan >= 3000) tier = 2;
-
-      const komisen = komisenByTier[tier] + '%';
-      const override = tier >= 3 ? 'Ya' : 'Tidak';
-
-      const rankingTable = document.getElementById('ranking-table');
-      rankingTable.innerHTML = '';
-
-      allPendaftar.forEach((pendaftar, index) => {
-        const referralCount = allPendaftar.filter(p => p.referral === pendaftar.pendaftar_id).length;
-        const jualanCount = allJualan
-          .filter(j => j.pendaftar_id === pendaftar.pendaftar_id)
-          .reduce((sum, j) => sum + j.jumlah, 0);
-
-        let pTier = 1;
-        if (jualanCount >= 10000 && referralCount >= 10) pTier = 5;
-        else if (jualanCount >= 8000 && referralCount >= 5) pTier = 4;
-        else if (jualanCount >= 5000 && referralCount >= 3) pTier = 3;
-        else if (jualanCount >= 3000) pTier = 2;
-
-        rankingTable.innerHTML += `
-          <tr${pendaftar.pendaftar_id === userId ? ' class="table-info"' : ''}>
-            <td>${index + 1}</td>
-            <td>${pendaftar.name}</td>
-            <td>${pendaftar.pendaftar_id}</td>
-            <td>${referralCount}</td>
-            <td>RM${jualanCount}</td>
-            <td>${pTier}</td>
-            <td>${komisenByTier[pTier]}%</td>
-            <td>${pTier >= 3 ? 'Ya' : 'Tidak'}</td>
-          </tr>
-        `;
-      });
-    }
-
-    function logout() {
-      localStorage.removeItem('user');
-      window.location.href = 'index.html';
-    }
-
-    getDashboardData();
-  </script></body>
+  <div class="card">
+    <h3>Top Referral Ranking</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Nama</th>
+          <th>ID Pendaftar</th>
+          <th>Jumlah Referral</th>
+        </tr>
+      </thead>
+      <tbody id="referral-body">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
 </html>
