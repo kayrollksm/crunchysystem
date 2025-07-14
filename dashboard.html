@@ -13,31 +13,37 @@
     const pendaftarID = localStorage.getItem("pendaftarID");
     const userNama = localStorage.getItem("userNama");
 
-    if (!pendaftarID) window.location.href = "login.html";
+    if (!pendaftarID) {
+      window.location.href = "login.html";
+    }
 
     document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
-      // === Top 10 Referral ===
-      const tableBody = document.getElementById("referral-body");
-
       const { data, error } = await supabase
         .from("pendaftar")
-        .select("nama,pendaftar_id");
+        .select("nama, pendaftar_id, referral");
 
       if (error) return alert("Gagal ambil data: " + error.message);
 
       const referralCount = {};
+      const myID = pendaftarID;
+      let myTotal = 0;
+
       for (const p of data) {
-        const { data: referred } = await supabase
-          .from("pendaftar")
-          .select("referral")
-          .eq("referral", p.pendaftar_id);
-        referralCount[p.pendaftar_id] = referred.length;
+        const id = p.pendaftar_id;
+        const ref = p.referral;
+
+        if (ref) {
+          referralCount[ref] = (referralCount[ref] || 0) + 1;
+          if (ref === myID) myTotal++;
+        }
       }
 
+      // Top 10
       const ranked = data
+        .filter(p => p.pendaftar_id)
         .map(p => ({
           nama: p.nama,
           pendaftar_id: p.pendaftar_id,
@@ -45,7 +51,7 @@
         }))
         .sort((a, b) => b.count - a.count);
 
-      tableBody.innerHTML = ranked.map((r, i) => `
+      document.getElementById("referral-body").innerHTML = ranked.slice(0, 10).map((r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${r.nama}</td>
@@ -54,46 +60,82 @@
         </tr>
       `).join("");
 
-      // === Statistik Sendiri ===
-      const { data: myReferrals } = await supabase
-        .from("pendaftar")
-        .select("id")
-        .eq("referral", pendaftarID);
-
-      document.getElementById("my-referral-count").innerText = myReferrals.length;
-      document.getElementById("my-referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`;
+      // Statistik Saya
+      document.getElementById("statistik").innerHTML = `
+        <div class="box">
+          <p>Jumlah Referral Anda: <b>${myTotal}</b></p>
+          <p>Link Referral: <span id="my-referral-link">https://kayrollksm.github.io/crunchysystem/?ref=${myID}</span></p>
+          <button onclick="copyLink()">Salin Link</button>
+        </div>
+      `;
     });
 
-    // Tab switch
-    window.showTab = function (tab) {
+    // Copy Function
+    window.copyLink = () => {
+      const link = document.getElementById("my-referral-link").innerText;
+      navigator.clipboard.writeText(link).then(() => {
+        alert("Link berjaya disalin!");
+      });
+    };
+
+    // Tab Function
+    window.showTab = (tab) => {
       document.getElementById("top10").style.display = tab === 'top10' ? 'block' : 'none';
       document.getElementById("statistik").style.display = tab === 'statistik' ? 'block' : 'none';
     };
-
-    // Copy
-    window.copyLink = function () {
-      const link = document.getElementById("my-referral-link").innerText;
-      navigator.clipboard.writeText(link);
-      alert("Link disalin!");
-    };
   </script>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 30px; }
-    table { margin: auto; border-collapse: collapse; width: 90%; }
-    th, td { border: 1px solid #aaa; padding: 10px; }
-    th { background-color: purple; color: white; }
-    .tab-btn { padding: 10px 20px; margin: 5px; cursor: pointer; }
-    .purple-btn { background: purple; color: white; border: none; }
-    .gray-btn { background: #eee; color: #333; border: none; }
-    .box { margin-top: 20px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; background: #fefefe; }
+    h2 { margin-bottom: 5px; }
+    .tabs button {
+      margin: 5px;
+      padding: 8px 16px;
+      border: none;
+      cursor: pointer;
+      background-color: purple;
+      color: white;
+      border-radius: 5px;
+    }
+    .tabs button.inactive {
+      background-color: #ddd;
+      color: #333;
+    }
+    table {
+      margin: auto;
+      border-collapse: collapse;
+      width: 90%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 10px;
+    }
+    th {
+      background-color: purple;
+      color: white;
+    }
+    #statistik {
+      margin-top: 20px;
+    }
+    .box {
+      border: 1px solid #999;
+      width: 90%;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
   <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
 
-  <button class="tab-btn purple-btn" onclick="showTab('top10')">Top 10 Referral</button>
-  <button class="tab-btn gray-btn" onclick="showTab('statistik')">Statistik Saya</button>
+  <div class="tabs">
+    <button onclick="showTab('top10')">Top 10 Referral</button>
+    <button onclick="showTab('statistik')">Statistik Saya</button>
+  </div>
 
   <div id="top10">
     <h3>Top Referral Ranking</h3>
@@ -113,11 +155,7 @@
   </div>
 
   <div id="statistik" style="display: none;">
-    <div class="box">
-      <p>Jumlah Referral Anda: <b><span id="my-referral-count">0</span></b></p>
-      <p>Link Referral: <span id="my-referral-link"></span></p>
-      <button onclick="copyLink()">Salin Link</button>
-    </div>
+    <p>Statistik anda akan ditambah di sini nanti.</p>
   </div>
 </body>
 </html>
