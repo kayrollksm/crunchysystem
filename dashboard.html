@@ -1,122 +1,77 @@
-<!DOCTYPE html><html lang="ms">
-<head>
+<!DOCTYPE html><html lang="ms"><head>
   <meta charset="UTF-8" />
-  <title>Dashboard Referral</title>
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-const supabaseKey = "***REMOVED***";
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-const pendaftarID = localStorage.getItem("pendaftarID");
-const userNama = localStorage.getItem("userNama");
-
-if (!pendaftarID) {
-  window.location.href = "login.html";
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("user-nama").innerText = userNama;
-  document.getElementById("user-id").innerText = pendaftarID;
-
-  const tableBody = document.getElementById("referral-body");
-
-  const { data, error } = await supabase.from("pendaftar").select("nama,pendaftar_id");
-
-  if (error) return alert("Gagal ambil data utama: " + error.message);
-
-  const referralCount = {};
-
-  for (const p of data) {
-    const { data: referred } = await supabase
-      .from("pendaftar")
-      .select("referral")
-      .eq("referral", p.pendaftar_id);
-
-    referralCount[p.pendaftar_id] = referred.length;
-  }
-
-  const ranked = data
-    .map(p => ({
-      nama: p.nama,
-      pendaftar_id: p.pendaftar_id,
-      count: referralCount[p.pendaftar_id] || 0
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  tableBody.innerHTML = ranked.map((r, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${r.nama}</td>
-      <td>${r.pendaftar_id}</td>
-      <td>${r.count}</td>
-    </tr>
-  `).join("");
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "login.html";
-  });
-});
-
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Anda</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
+      background-color: #fff;
+      color: #000;
       font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 40px;
-      background-color: #fff8f8;
-    }
-    h2, h3 {
-      color: #b30000;
-    }
-    table {
-      margin: auto;
-      border-collapse: collapse;
-      width: 90%;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-    }
-    th {
-      background-color: #ff0000;
-      color: white;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #b30000;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    button:hover {
-      background-color: #ff1a1a;
-    }
-  </style>
-</head>
-<body>
-  <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p><button id="logoutBtn">Logout</button>
+      padding: 20px;
+    }.dashboard-title {
+  color: #800020;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
 
-  <h3>Top Referral Ranking</h3>
-  <table>
+.info {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #800020;
+  color: #fff;
+}
+
+.loading {
+  font-style: italic;
+  color: #555;
+}
+
+.btn-dashboard {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+  </style>
+</head><body>
+  <h2 class="dashboard-title">Dashboard Anda</h2>  <div class="info">
+    <p>Nama: <span id="nama"></span> | ID: <strong id="idPendaftar"></strong></p>
+    <p>Jumlah Jualan: <span id="jumlahJualan">Loading...</span></p>
+    <p>Jumlah Referral: <span id="jumlahReferral">Loading...</span></p>
+    <p>Tier Semasa: <span id="tierSemasa">Loading...</span></p>
+    <p>Komisen: <span id="komisen">Loading...</span></p>
+    <p>Override Komisen: <span id="override">Loading...</span></p>
+  </div>  <div class="btn-dashboard">
+    <a href="thank.html" class="btn btn-outline-danger">Ke Halaman Terima Kasih</a>
+  </div>  <h4 class="text-center mt-4">Top Referral Ranking</h4>
+  <table class="table table-bordered mt-3">
     <thead>
       <tr>
         <th>Rank</th>
         <th>Nama</th>
-        <th>ID Pendaftar</th>
-        <th>Jumlah Referral</th>
+        <th>ID</th>
+        <th>Referral</th>
+        <th>Jualan</th>
+        <th>Tier</th>
       </tr>
     </thead>
-    <tbody id="referral-body">
-      <tr><td colspan="4">Loading...</td></tr>
+    <tbody id="referralTable">
+      <tr><td colspan="6" class="loading">Loading...</td></tr>
     </tbody>
-  </table>
-</body>
-</html>
+  </table>  <script src="./scripts/dashboard.js"></script></body></html>
