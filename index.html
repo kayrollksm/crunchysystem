@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <title>Redirect...</title>
+  <title>Redirecting...</title>
   <script>
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
-    if (ref) {
-      window.location.href = `register.html?ref=${ref}`;
-    } else {
-      window.location.href = "register.html";
-    }
+    const target = ref ? `register.html?ref=${ref}` : "register.html";
+    window.location.href = target;
   </script>
 </head>
 <body>
-  <p>Sedang redirect ke halaman pendaftaran...</p>
+  <p>Sedang alih ke halaman pendaftaran...</p>
 </body>
 </html>
