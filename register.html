@@ -1,64 +1,61 @@
-<!DOCTYPE html>
-<html lang="ms">
+<!DOCTYPE html><html lang="ms">
 <head>
   <meta charset="UTF-8">
   <title>Daftar Mouthgasm Crunchy</title>
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+const supabaseKey = "***REMOVED***";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    const supabase = createClient(supabaseUrl, supabaseKey);
+const form = document.getElementById("registerForm");
 
-    const form = document.getElementById("registerForm");
+function getNextBatch(referralCode) {
+  if (!referralCode) return "A";
+  const lastChar = referralCode.slice(-1).toUpperCase();
+  if (/^[A-Z]$/.test(lastChar)) {
+    return String.fromCharCode(lastChar.charCodeAt(0) + 1);
+  } else if (/^[A-Z]{2}$/.test(lastChar)) {
+    return "AA";
+  } else {
+    return "A";
+  }
+}
 
-    function getNextBatch(referralCode) {
-      if (!referralCode) return "A"; // Direct HQ
-      const lastChar = referralCode.slice(-1).toUpperCase();
-      if (/^[A-Z]$/.test(lastChar)) {
-        return String.fromCharCode(lastChar.charCodeAt(0) + 1);
-      } else if (/^[A-Z]{2}$/.test(lastChar)) {
-        // Contoh: Z → AA
-        return "AA"; // (optional: tambah logik lebih lanjut)
-      } else {
-        return "A";
-      }
-    }
+function generateRandomNumber(length = 5) {
+  const max = Math.pow(10, length);
+  return Math.floor(Math.random() * max).toString().padStart(length, "0");
+}
 
-    function generateRandomNumber(length = 5) {
-      const max = Math.pow(10, length);
-      return Math.floor(Math.random() * max).toString().padStart(length, "0");
-    }
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  const nama = form.nama.value.trim();
+  const telefon = form.telefon.value.trim();
+  const email = form.email.value.trim();
+  const referral = form.referral.value.trim().toUpperCase();
 
-      const nama = form.nama.value.trim();
-      const telefon = form.telefon.value.trim();
-      const email = form.email.value.trim();
-      const referral = form.referral.value.trim().toUpperCase();
+  const batch = getNextBatch(referral);
+  const randomNo = generateRandomNumber();
+  const pendaftar_id = `MC${randomNo}${batch}`;
 
-      const batch = getNextBatch(referral);
-      const randomNo = generateRandomNumber();
-      const pendaftar_id = `MC${randomNo}${batch}`;
+  const { error } = await supabase.from("pendaftar").insert([{
+    nama,
+    telefon,
+    email,
+    referral,
+    pendaftar_id,
+    batch
+  }]);
 
-      const { error } = await supabase.from("pendaftar").insert([{
-        nama,
-        telefon,
-        email,
-        referral,
-        pendaftar_id,
-        batch
-      }]);
+  if (error) {
+    alert("Pendaftaran gagal: " + error.message);
+  } else {
+    localStorage.setItem("pendaftarID", pendaftar_id);
+    localStorage.setItem("userNama", nama);
+    window.location.href = "thank.html";
+  }
+});
 
-      if (error) {
-        alert("Pendaftaran gagal: " + error.message);
-      } else {
-        localStorage.setItem("pendaftarID", pendaftar_id);
-        localStorage.setItem("userNama", nama);
-        window.location.href = "thank.html";
-      }
-    });
   </script>
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
