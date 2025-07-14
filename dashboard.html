@@ -20,54 +20,38 @@
     document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
-      document.getElementById("referral-link").value =
-        `https://kayrollksm.github.io/crunchysystem/register.html?ref=${pendaftarID}`;
 
-      document.getElementById("copy-btn").addEventListener("click", () => {
-        const linkField = document.getElementById("referral-link");
-        linkField.select();
-        linkField.setSelectionRange(0, 99999);
-        document.execCommand("copy");
-        alert("Link referral berjaya disalin!");
+      // Default: show top 10
+      showTop10();
+
+      document.getElementById("btn-top10").addEventListener("click", () => {
+        document.getElementById("top10-section").style.display = "block";
+        document.getElementById("statistik-section").style.display = "none";
       });
 
-      document.getElementById("logout-btn").onclick = () => {
-        localStorage.removeItem("pendaftarID");
-        localStorage.removeItem("userNama");
+      document.getElementById("btn-statistik").addEventListener("click", () => {
+        document.getElementById("top10-section").style.display = "none";
+        document.getElementById("statistik-section").style.display = "block";
+        showMyStat();
+      });
+
+      document.getElementById("btn-logout").addEventListener("click", () => {
+        localStorage.clear();
         window.location.href = "login.html";
-      };
+      });
+    });
 
-      // Tab behavior
-      const tabReferral = document.getElementById("tab-referral");
-      const tabStatistik = document.getElementById("tab-statistik");
-      const contentReferral = document.getElementById("referral-section");
-      const contentStatistik = document.getElementById("statistik-section");
-
-      tabReferral.onclick = () => {
-        contentReferral.style.display = "block";
-        contentStatistik.style.display = "none";
-        tabReferral.classList.add("active");
-        tabStatistik.classList.remove("active");
-      };
-
-      tabStatistik.onclick = () => {
-        contentReferral.style.display = "none";
-        contentStatistik.style.display = "block";
-        tabReferral.classList.remove("active");
-        tabStatistik.classList.add("active");
-      };
-
-      // Load ranking
+    async function showTop10() {
       const tableBody = document.getElementById("referral-body");
+      tableBody.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
 
       const { data, error } = await supabase
         .from("pendaftar")
         .select("nama,pendaftar_id");
 
-      if (error) return alert("Gagal ambil data: " + error.message);
+      if (error) return alert("Gagal ambil data utama: " + error.message);
 
       const referralCount = {};
-
       for (const p of data) {
         const { data: referred } = await supabase
           .from("pendaftar")
@@ -77,103 +61,68 @@
       }
 
       const ranked = data
-        .map((p) => ({
+        .map(p => ({
           nama: p.nama,
           pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0,
+          count: referralCount[p.pendaftar_id] || 0
         }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
-      tableBody.innerHTML = ranked
-        .map(
-          (r, i) => `
-          <tr>
-            <td>${i + 1}</td>
-            <td>${r.nama}</td>
-            <td>${r.pendaftar_id}</td>
-            <td>${r.count}</td>
-          </tr>`
-        )
-        .join("");
-    });
+      tableBody.innerHTML = ranked.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.nama}</td>
+          <td>${r.pendaftar_id}</td>
+          <td>${r.count}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function showMyStat() {
+      const statBody = document.getElementById("my-stat-body");
+      statBody.innerHTML = `<tr><td colspan="3">Loading...</td></tr>`;
+
+      const { data, error } = await supabase
+        .from("pendaftar")
+        .select("nama, email, created_at")
+        .eq("referral", pendaftarID);
+
+      if (error) return alert("Gagal ambil statistik: " + error.message);
+
+      if (data.length === 0) {
+        statBody.innerHTML = `<tr><td colspan="3">Tiada referral lagi.</td></tr>`;
+        return;
+      }
+
+      statBody.innerHTML = data.map((d, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${d.nama}</td>
+          <td>${new Date(d.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join("");
+    }
   </script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 30px;
-    }
-
-    table {
-      margin: auto;
-      border-collapse: collapse;
-      width: 90%;
-    }
-
-    th, td {
-      border: 1px solid #aaa;
-      padding: 10px;
-    }
-
-    th {
-      background-color: purple;
-      color: white;
-    }
-
-    .tab {
-      margin: 20px 5px;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .active {
-      background-color: purple;
-      color: white;
-    }
-
-    #referral-box {
-      margin: 20px 0;
-    }
-
-    input[type="text"] {
-      width: 70%;
-      padding: 10px;
-      margin-right: 5px;
-    }
-
-    button {
-      padding: 10px 15px;
-      cursor: pointer;
-    }
-
-    #logout-btn {
-      background-color: #ff4d4d;
-      color: white;
-      border: none;
-      margin-top: 20px;
-    }
+    body { font-family: Arial; text-align: center; margin-top: 40px; }
+    table { margin: auto; border-collapse: collapse; width: 90%; }
+    th, td { border: 1px solid #aaa; padding: 10px; }
+    th { background-color: purple; color: white; }
+    #btn-top10, #btn-statistik { margin: 5px; padding: 6px 12px; border: none; cursor: pointer; }
+    #btn-top10 { background: lightgray; }
+    #btn-statistik { background: purple; color: white; }
+    #btn-logout { margin-top: 30px; background: red; color: white; padding: 8px 16px; border: none; cursor: pointer; }
   </style>
 </head>
-
 <body>
   <h2>Dashboard Referral</h2>
-  <p>
-    Selamat datang, <b><span id="user-nama"></span></b>! ID anda:
-    <b><span id="user-id"></span></b>
-  </p>
+  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
 
-  <div id="referral-box">
-    <input type="text" id="referral-link" readonly />
-    <button id="copy-btn">Salin Link</button>
-  </div>
+  <button id="btn-top10">Top 10 Referral</button>
+  <button id="btn-statistik">Statistik Saya</button>
 
-  <button id="tab-referral" class="tab active">Top 10 Referral</button>
-  <button id="tab-statistik" class="tab">Statistik Saya</button>
-
-  <div id="referral-section">
+  <div id="top10-section">
     <h3>Top Referral Ranking</h3>
     <table>
       <thead>
@@ -184,16 +133,24 @@
           <th>Jumlah Referral</th>
         </tr>
       </thead>
-      <tbody id="referral-body">
-        <tr><td colspan="4">Loading...</td></tr>
-      </tbody>
+      <tbody id="referral-body"></tbody>
     </table>
   </div>
 
-  <div id="statistik-section" style="display: none;">
-    <p>Statistik anda akan ditambah di sini nanti.</p>
+  <div id="statistik-section" style="display:none;">
+    <h3>Senarai Referral Anda</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Bil</th>
+          <th>Nama</th>
+          <th>Tarikh Daftar</th>
+        </tr>
+      </thead>
+      <tbody id="my-stat-body"></tbody>
+    </table>
   </div>
 
-  <button id="logout-btn">Log Keluar</button>
+  <button id="btn-logout">Log Keluar</button>
 </body>
 </html>
