@@ -5,6 +5,7 @@ const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("login-form");
+  const errorBox = document.getElementById("error-msg");
 
   if (!form) {
     alert("Form login tidak dijumpai!");
@@ -26,8 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .single();
 
       if (error || !data) {
-        document.getElementById("error-msg").classList.remove("hidden");
-        alert("❌ Login gagal. Sila semak maklumat.");
+        errorBox.classList.remove("hidden");
         return;
       }
 
@@ -36,17 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("nama", data.nama);
       localStorage.setItem("batch", data.batch);
 
-      // ✅ HARD REDIRECT via anchor click
-      const anchor = document.createElement("a");
-      anchor.href = "dashboard.html";
-      anchor.click();
-
-      // Fallback (in case above skipped)
       window.location.href = "dashboard.html";
-
+      
     } catch (err) {
       alert("❌ Ralat sistem. Sila cuba lagi.");
       console.error("Login Error:", err);
     }
   });
+
+  // Auto-hide error bila user type balik
+  form.email.addEventListener("input", () => errorBox.classList.add("hidden"));
+  form.pendaftar_id.addEventListener("input", () => errorBox.classList.add("hidden"));
 });
