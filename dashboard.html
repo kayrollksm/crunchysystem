@@ -5,43 +5,49 @@
   <title>Dashboard - CrunchySystem</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">  <div class="w-full max-w-lg p-6 bg-white rounded-2xl shadow-lg border border-rose-200">
-    <h2 class="text-2xl font-bold text-rose-600 mb-1">Dashboard<br>CrunchySystem</h2>
-    <p class="text-gray-600 mb-4">Selamat datang, <span id="nama-user">...</span></p><div class="grid grid-cols-2 gap-4 mb-4">
-  <div class="bg-rose-50 p-4 rounded-xl text-center">
+<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-rose-200 text-center">
+    <h2 class="text-2xl font-bold text-rose-600 mb-2">Dashboard<br />CrunchySystem</h2>
+    <p class="text-sm text-gray-600 mb-4">Selamat datang, <span id="nama-user">...</span></p><div class="grid grid-cols-2 gap-4 mb-4">
+  <div class="bg-rose-50 p-3 rounded-xl">
     <p class="text-xs text-gray-500">ID Pendaftar</p>
     <p id="id-user" class="font-bold text-rose-700">-</p>
   </div>
-  <div class="bg-rose-50 p-4 rounded-xl text-center">
-    <p class="text-xs text-gray-500">Batch</p>
+  <div class="bg-rose-50 p-3 rounded-xl">
+    <p class="text-xs text-gray-500">Tier</p>
     <p id="batch-user" class="font-bold text-rose-700">-</p>
   </div>
 </div>
 
-<div class="bg-yellow-50 p-4 rounded-xl text-center mb-4">
-  <p class="text-xs text-gray-500">Jumlah Referral</p>
-  <p id="jumlah-referral" class="text-3xl font-bold text-yellow-600">0</p>
+<div class="bg-yellow-100 p-4 rounded-xl mb-4">
+  <p class="text-sm text-gray-600">Jumlah Referral</p>
+  <p id="jumlah-referral" class="text-2xl font-bold text-yellow-700">0</p>
 </div>
 
-<div>
-  <h3 class="font-bold text-lg mb-2">🏆 Top 10 Referrer</h3>
-  <ul id="top10-list" class="text-sm text-gray-700 list-decimal list-inside space-y-1">
-    <li>Memuatkan data…</li>
-  </ul>
+<div class="bg-green-100 p-4 rounded-xl mb-4">
+  <p class="text-sm text-gray-600">Total Jualan Referral</p>
+  <p id="total-sale" class="text-2xl font-bold text-green-700">RM0</p>
 </div>
 
-<div class="text-center mt-6">
-  <a href="beli.html" class="inline-block bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm transition">
-    ➕ Simulator Pembelian
-  </a>
+<div class="bg-indigo-100 p-4 rounded-xl mb-4">
+  <p class="text-sm text-gray-600">Total Komisen</p>
+  <p id="total-komisen" class="text-2xl font-bold text-indigo-700">RM0</p>
 </div>
 
-<div class="text-center mt-4">
-  <button onclick="logout()"
-    class="bg-gray-400 hover:bg-gray-600 text-white px-4 py-2 rounded-xl text-sm transition">
-    Logout
-  </button>
-</div>
+<h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">🏆 Top 10 Referrer</h3>
+<ul id="top10-list" class="text-sm text-gray-700 space-y-1">
+  <li>1. Memuatkan data…</li>
+</ul>
 
-  </div>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>  <script src="dashboard.js"></script></body>
+<button onclick="window.location.href='beli.html'"
+  class="mt-6 w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-xl font-semibold">
+  ➕ Simulator Pembelian
+</button>
+
+<button onclick="logout()"
+  class="mt-2 w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-xl font-semibold">
+  Logout
+</button>
+
+  </div>  <script src="dashboard.js"></script></body>
 </html>
