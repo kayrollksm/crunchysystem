@@ -1,59 +1,37 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login Pengguna</title>
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
-
-    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("loginForm");
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const email = form.email.value.trim();
-        const pendaftar_id = form.pendaftar_id.value.trim();
-
-        const { data, error } = await supabase
-          .from("pendaftar")
-          .select("*")
-          .eq("email", email)
-          .eq("pendaftar_id", pendaftar_id);
-
-        if (error) {
-          alert("Ralat semasa login: " + error.message);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          const user = data[0];
-          localStorage.setItem("pendaftarID", user.pendaftar_id);
-          localStorage.setItem("email", user.email);
-          localStorage.setItem("userNama", user.nama);
-          window.location.href = "dashboard.html";
-        } else {
-          alert("Login gagal: ID atau email tidak sah.");
-        }
-      });
-    });
-  </script>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
-    input { margin: 10px 0; padding: 10px; width: 300px; }
-    button { padding: 10px 30px; background-color: purple; color: white; border: none; cursor: pointer; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - CrunchySystem</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Login Pengguna</h2>
-  <form id="loginForm">
-    <input type="email" id="email" placeholder="Email" required /><br />
-    <input type="text" id="pendaftar_id" placeholder="ID Pendaftar" required /><br />
-    <button type="submit">Log Masuk</button>
-  </form>
+<body class="bg-gradient-to-br from-orange-100 to-yellow-50 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-sm p-6 bg-white rounded-2xl shadow-md">
+    <h2 class="text-2xl font-bold text-center text-orange-600 mb-4">Login CrunchySystem</h2>
+
+    <form id="login-form" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required
+          class="mt-1 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400" />
+      </div>
+
+      <div>
+        <label for="pendaftar_id" class="block text-sm font-medium text-gray-700">ID Pendaftar</label>
+        <input type="text" id="pendaftar_id" name="pendaftar_id" required
+          class="mt-1 w-full px-4 py-2 border rounded-xl uppercase focus:outline-none focus:ring-2 focus:ring-orange-400" />
+      </div>
+
+      <div id="error-msg" class="text-red-600 text-sm hidden">Login gagal. Sila semak semula.</div>
+
+      <button type="submit"
+        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-xl transition">
+        Log Masuk
+      </button>
+    </form>
+  </div>
+
 </body>
 </html>
