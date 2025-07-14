@@ -1,51 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard - CrunchySystem</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-rose-50 to-yellow-50 min-h-screen p-6">
+const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+const supabaseKey = "***REMOVED***";
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-rose-200">
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <h2 class="text-2xl font-bold text-rose-600">Dashboard CrunchySystem</h2>
-        <p class="text-gray-600 text-sm">Selamat datang, <span id="nama-user" class="font-semibold text-gray-900">...</span></p>
-      </div>
-      <button onclick="logout()"
-        class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
-        Logout
-      </button>
-    </div>
+document.addEventListener("DOMContentLoaded", async () => {
+  const pendaftar_id = localStorage.getItem("pendaftar_id");
+  const nama = localStorage.getItem("nama");
+  const batch = localStorage.getItem("batch");
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
-        <p class="text-gray-500 text-sm">ID Pendaftar</p>
-        <p id="id-user" class="text-lg font-bold text-rose-700">-</p>
-      </div>
-      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
-        <p class="text-gray-500 text-sm">Batch</p>
-        <p id="batch-user" class="text-lg font-bold text-rose-700">-</p>
-      </div>
-      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl col-span-2">
-        <p class="text-gray-500 text-sm">Jumlah Referral</p>
-        <p id="jumlah-referral" class="text-3xl font-bold text-rose-700">0</p>
-      </div>
-    </div>
+  // 🛡 Redirect ke login kalau tiada session
+  if (!pendaftar_id || !nama) {
+    window.location.href = "login.html";
+    return;
+  }
 
-    <div>
-      <h3 class="text-lg font-bold mb-2 text-gray-800">🏆 Top 10 Referrer</h3>
-      <ul id="top10-list" class="list-decimal pl-5 text-sm text-gray-700 space-y-1">
-        <li>Memuatkan data...</li>
-      </ul>
-    </div>
-  </div>
+  // 🧾 Papar data pengguna
+  document.getElementById("nama-user").textContent = nama ?? "-";
+  document.getElementById("id-user").textContent = pendaftar_id ?? "-";
+  document.getElementById("batch-user").textContent = batch ?? "-";
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="dashboard.js"></script>
-  <script src="logout.js"></script>
-</body>
-</html>
+  // 📊 Jumlah referral
+  const { count, error: referralErr } = await supabase
+    .from("pendaftar")
+    .select("id", { count: "exact" })
+    .eq("referral", pendaftar_id);
+
+  if (!referralErr) {
+    document.getElementById("jumlah-referral").textContent = count ?? 0;
+  } else {
+    document.getElementById("jumlah-referral").textContent = "0";
+  }
+
+  // 🏆 Papar Top 10 Referrer
+  const { data: topData, error: topErr } = await supabase
+    .from("pendaftar")
+    .select("nama, total_referral")
+    .order("total_referral", { ascending: false })
+    .limit(10);
+
+  const topList = document.getElementById("top10-list");
+  topList.innerHTML = "";
+
+  if (!topErr && topData.length > 0) {
+    topData.forEach((user, index) => {
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${user.nama} – ${user.total_referral ?? 0} referral`;
+      topList.appendChild(li);
+    });
+  } else {
+    topList.innerHTML = "<li>Tiada data.</li>";
+  }
+});
+
+// 🔓 Logout
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
