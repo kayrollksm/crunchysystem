@@ -7,8 +7,7 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey =
-      "***REMOVED***";
+    const supabaseKey = "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const pendaftarID = localStorage.getItem("pendaftarID");
@@ -21,7 +20,24 @@
     document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
+      document.getElementById("referral-link").value =
+        `https://kayrollksm.github.io/crunchysystem/register.html?ref=${pendaftarID}`;
 
+      document.getElementById("copy-btn").addEventListener("click", () => {
+        const linkField = document.getElementById("referral-link");
+        linkField.select();
+        linkField.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        alert("Link referral berjaya disalin!");
+      });
+
+      document.getElementById("logout-btn").onclick = () => {
+        localStorage.removeItem("pendaftarID");
+        localStorage.removeItem("userNama");
+        window.location.href = "login.html";
+      };
+
+      // Tab behavior
       const tabReferral = document.getElementById("tab-referral");
       const tabStatistik = document.getElementById("tab-statistik");
       const contentReferral = document.getElementById("referral-section");
@@ -41,14 +57,14 @@
         tabStatistik.classList.add("active");
       };
 
-      // Load data ranking
+      // Load ranking
       const tableBody = document.getElementById("referral-body");
 
       const { data, error } = await supabase
         .from("pendaftar")
         .select("nama,pendaftar_id");
 
-      if (error) return alert("Gagal ambil data utama: " + error.message);
+      if (error) return alert("Gagal ambil data: " + error.message);
 
       const referralCount = {};
 
@@ -72,21 +88,14 @@
       tableBody.innerHTML = ranked
         .map(
           (r, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${r.nama}</td>
-          <td>${r.pendaftar_id}</td>
-          <td>${r.count}</td>
-        </tr>`
+          <tr>
+            <td>${i + 1}</td>
+            <td>${r.nama}</td>
+            <td>${r.pendaftar_id}</td>
+            <td>${r.count}</td>
+          </tr>`
         )
         .join("");
-
-      // Logout
-      document.getElementById("logout-btn").onclick = () => {
-        localStorage.removeItem("pendaftarID");
-        localStorage.removeItem("userNama");
-        window.location.href = "login.html";
-      };
     });
   </script>
 
@@ -94,7 +103,7 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 40px;
+      margin: 30px;
     }
 
     table {
@@ -103,8 +112,7 @@
       width: 90%;
     }
 
-    th,
-    td {
+    th, td {
       border: 1px solid #aaa;
       padding: 10px;
     }
@@ -126,13 +134,26 @@
       color: white;
     }
 
+    #referral-box {
+      margin: 20px 0;
+    }
+
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      margin-right: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+
     #logout-btn {
-      margin-top: 30px;
-      padding: 10px 20px;
       background-color: #ff4d4d;
       color: white;
       border: none;
-      cursor: pointer;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -143,6 +164,11 @@
     Selamat datang, <b><span id="user-nama"></span></b>! ID anda:
     <b><span id="user-id"></span></b>
   </p>
+
+  <div id="referral-box">
+    <input type="text" id="referral-link" readonly />
+    <button id="copy-btn">Salin Link</button>
+  </div>
 
   <button id="tab-referral" class="tab active">Top 10 Referral</button>
   <button id="tab-statistik" class="tab">Statistik Saya</button>
