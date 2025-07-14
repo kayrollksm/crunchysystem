@@ -7,7 +7,9 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
+    const supabaseKey =
+      "***REMOVED***";
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const pendaftarID = localStorage.getItem("pendaftarID");
@@ -21,29 +23,12 @@
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
-      // Default: show top 10
-      showTop10();
+      // Papar jualan jika ada dari localStorage
+      const jualanSemasa = parseFloat(localStorage.getItem("totalJualan")) || 0;
+      document.getElementById("total-jualan").innerText = jualanSemasa.toFixed(2);
+      updateKomisenDanTier(jualanSemasa);
 
-      document.getElementById("btn-top10").addEventListener("click", () => {
-        document.getElementById("top10-section").style.display = "block";
-        document.getElementById("statistik-section").style.display = "none";
-      });
-
-      document.getElementById("btn-statistik").addEventListener("click", () => {
-        document.getElementById("top10-section").style.display = "none";
-        document.getElementById("statistik-section").style.display = "block";
-        showMyStat();
-      });
-
-      document.getElementById("btn-logout").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "login.html";
-      });
-    });
-
-    async function showTop10() {
       const tableBody = document.getElementById("referral-body");
-      tableBody.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
 
       const { data, error } = await supabase
         .from("pendaftar")
@@ -52,105 +37,133 @@
       if (error) return alert("Gagal ambil data utama: " + error.message);
 
       const referralCount = {};
+
       for (const p of data) {
         const { data: referred } = await supabase
           .from("pendaftar")
           .select("referral")
           .eq("referral", p.pendaftar_id);
+
         referralCount[p.pendaftar_id] = referred.length;
       }
 
       const ranked = data
-        .map(p => ({
+        .map((p) => ({
           nama: p.nama,
           pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0
+          count: referralCount[p.pendaftar_id] || 0,
         }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
+        .sort((a, b) => b.count - a.count);
 
-      tableBody.innerHTML = ranked.map((r, i) => `
+      tableBody.innerHTML = ranked
+        .map(
+          (r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${r.nama}</td>
           <td>${r.pendaftar_id}</td>
           <td>${r.count}</td>
-        </tr>
-      `).join("");
+        </tr>`
+        )
+        .join("");
+    });
+
+    // Fungsi beli
+    window.simulatePurchase = function () {
+      const qty = parseInt(document.getElementById("beli-qty").value);
+      if (!qty || qty <= 0) return alert("Masukkan jumlah unit yang sah");
+
+      const previous = parseFloat(localStorage.getItem("totalJualan")) || 0;
+      const tambah = qty * 15;
+      const newTotal = previous + tambah;
+
+      localStorage.setItem("totalJualan", newTotal.toString());
+      document.getElementById("total-jualan").innerText = newTotal.toFixed(2);
+
+      updateKomisenDanTier(newTotal);
+    };
+
+    function updateKomisenDanTier(jualan) {
+      let tier = "Tier 1";
+      if (jualan >= 3000) tier = "Tier 5";
+      else if (jualan >= 1500) tier = "Tier 4";
+      else if (jualan >= 800) tier = "Tier 3";
+      else if (jualan >= 300) tier = "Tier 2";
+
+      const komisen = jualan * 0.1;
+      document.getElementById("user-tier").innerText = tier;
+      document.getElementById("user-komisen").innerText =
+        "RM" + komisen.toFixed(2);
     }
 
-    async function showMyStat() {
-      const statBody = document.getElementById("my-stat-body");
-      statBody.innerHTML = `<tr><td colspan="3">Loading...</td></tr>`;
-
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("nama, email, created_at")
-        .eq("referral", pendaftarID);
-
-      if (error) return alert("Gagal ambil statistik: " + error.message);
-
-      if (data.length === 0) {
-        statBody.innerHTML = `<tr><td colspan="3">Tiada referral lagi.</td></tr>`;
-        return;
-      }
-
-      statBody.innerHTML = data.map((d, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${d.nama}</td>
-          <td>${new Date(d.created_at).toLocaleDateString()}</td>
-        </tr>
-      `).join("");
-    }
+    // Logout
+    window.logout = function () {
+      localStorage.clear();
+      window.location.href = "login.html";
+    };
   </script>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 40px; }
-    table { margin: auto; border-collapse: collapse; width: 90%; }
-    th, td { border: 1px solid #aaa; padding: 10px; }
-    th { background-color: purple; color: white; }
-    #btn-top10, #btn-statistik { margin: 5px; padding: 6px 12px; border: none; cursor: pointer; }
-    #btn-top10 { background: lightgray; }
-    #btn-statistik { background: purple; color: white; }
-    #btn-logout { margin-top: 30px; background: red; color: white; padding: 8px 16px; border: none; cursor: pointer; }
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 30px;
+    }
+    table {
+      margin: auto;
+      border-collapse: collapse;
+      width: 90%;
+    }
+    th,
+    td {
+      border: 1px solid #aaa;
+      padding: 10px;
+    }
+    th {
+      background-color: purple;
+      color: white;
+    }
+    input {
+      padding: 5px;
+      width: 80px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 5px 20px;
+      background: purple;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
   <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
+  <p>Tier Semasa: <b><span id="user-tier">Tier 1</span></b></p>
+  <p>Jumlah Komisen Terkumpul: <b><span id="user-komisen">RM0.00</span></b></p>
+  <p><button onclick="logout()">Log Keluar</button></p>
 
-  <button id="btn-top10">Top 10 Referral</button>
-  <button id="btn-statistik">Statistik Saya</button>
+  <hr>
+  <h3>Simulasi Pembelian</h3>
+  <p>Harga seunit: <b>RM15</b></p>
+  <input type="number" id="beli-qty" placeholder="Unit" min="1" />
+  <button onclick="simulatePurchase()">Beli Sekarang</button>
+  <p>Total Jualan: <b>RM<span id="total-jualan">0.00</span></b></p>
 
-  <div id="top10-section">
-    <h3>Top Referral Ranking</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Nama</th>
-          <th>ID Pendaftar</th>
-          <th>Jumlah Referral</th>
-        </tr>
-      </thead>
-      <tbody id="referral-body"></tbody>
-    </table>
-  </div>
-
-  <div id="statistik-section" style="display:none;">
-    <h3>Senarai Referral Anda</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Bil</th>
-          <th>Nama</th>
-          <th>Tarikh Daftar</th>
-        </tr>
-      </thead>
-      <tbody id="my-stat-body"></tbody>
-    </table>
-  </div>
-
-  <button id="btn-logout">Log Keluar</button>
+  <hr>
+  <h3>Top Referral Ranking</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Nama</th>
+        <th>ID Pendaftar</th>
+        <th>Jumlah Referral</th>
+      </tr>
+    </thead>
+    <tbody id="referral-body">
+      <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
 </body>
 </html>
