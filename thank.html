@@ -6,33 +6,36 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 40px;
       text-align: center;
+      padding: 50px;
     }
-    .highlight {
+    h2 {
+      color: #4CAF50;
+    }
+    #referral-link {
       font-weight: bold;
-      color: purple;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background-color: purple;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h2>Terima kasih kerana mendaftar!</h2>
-  <p>ID Pendaftar anda: <span id="idPendaftar" class="highlight"></span></p>
-  <p>Link Referral anda: <a id="referral-link" class="highlight" target="_blank"></a></p>
+  <p>ID Pendaftar anda: <span id="idPendaftar"></span></p>
+  <p>Link Referral anda: <span id="referral-link"></span></p>
+
+  <button onclick="window.location.href='dashboard.html'">Pergi ke Dashboard</button>
 
   <script>
     const id = localStorage.getItem("pendaftarID");
-    const idText = document.getElementById("idPendaftar");
-    const referralLink = document.getElementById("referral-link");
-
-    if (id) {
-      idText.innerText = id;
-      referralLink.innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${id}`;
-      referralLink.href = `https://kayrollksm.github.io/crunchysystem/?ref=${id}`;
-    } else {
-      idText.innerText = "Tidak dijumpai.";
-      referralLink.innerText = "Sila daftar semula.";
-    }
+    document.getElementById("idPendaftar").innerText = id;
+    document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${id}`;
   </script>
 </body>
 </html>
