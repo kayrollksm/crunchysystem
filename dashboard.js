@@ -1,64 +1,51 @@
- import { createClient } from "https://esm.sh/@supabase/supabase-js";
+// dashboard.js
+const supabaseUrl = "https://mbtovkknnkynbixvqxtp.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1idG92a2tubmt5bmJpeHZxeHRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI2NzkzNDcsImV4cCI6MjAyODI1NTM0N30.CvGQ5oStajMRP6IO1Bh0VFE0reK0Kkb-SMDtubwnFCg";
 
-// Supabase connection
-const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-const supabaseKey = "***REMOVED***";
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Dapatkan info user dari localStorage
-const pendaftarID = localStorage.getItem("pendaftarID");
-const userNama = localStorage.getItem("userNama");
+// Ambil ID dari localStorage
+const pendaftar_id = localStorage.getItem("pendaftar_id");
+const nama = localStorage.getItem("nama");
+const batch = localStorage.getItem("batch");
 
-// Kalau tak login, redirect
-if (!pendaftarID) {
+if (!pendaftar_id) {
   window.location.href = "login.html";
 }
 
-// Papar nama & ID
-document.getElementById("user-nama").innerText = userNama;
-document.getElementById("user-id").innerText = pendaftarID;
-document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/register.html?ref=${pendaftarID}`;
+// Papar nama & batch
+document.getElementById("nama-user").textContent = nama;
+document.getElementById("id-user").textContent = pendaftar_id;
+document.getElementById("batch-user").textContent = batch;
 
-// Kira dan paparkan statistik
-async function loadStats() {
-  // Dapatkan semua referral direct
-  const { data: referralList, error: refError } = await supabase
+// Dapatkan jumlah referral
+async function kiraReferralSaya() {
+  const { count, error } = await supabase
     .from("pendaftar")
-    .select("*")
-    .eq("referral", pendaftarID);
+    .select("id", { count: "exact" })
+    .eq("referral_id", pendaftar_id);
 
-  if (refError) {
-    alert("Gagal dapatkan referral: " + refError.message);
-    return;
-  }
-
-  const totalReferral = referralList.length;
-  const totalSale = referralList.reduce((sum, r) => sum + (r.jumlah || 0), 0);
-
-  // Papar data
-  document.getElementById("total-referral").innerText = totalReferral;
-  document.getElementById("total-sale").innerText = "RM" + totalSale;
-
-  // Kira tier
-  let tier = 1;
-  if (totalSale >= 10000 && totalReferral >= 10) tier = 5;
-  else if (totalSale >= 8000 && totalReferral >= 5) tier = 4;
-  else if (totalSale >= 5000 && totalReferral >= 3) tier = 3;
-  else if (totalSale >= 3000) tier = 2;
-
-  // Kira komisen %
-  const komisenList = { 1: 10, 2: 13, 3: 15, 4: 18, 5: 20 };
-  const komisen = komisenList[tier];
-
-  document.getElementById("tier-level").innerText = "Tier " + tier;
-  document.getElementById("commission").innerText = komisen + "%";
+  document.getElementById("jumlah-referral").textContent = count ?? 0;
 }
 
-loadStats();
+kiraReferralSaya();
 
-// Logout function
-document.getElementById("logout-btn").addEventListener("click", () => {
-  localStorage.removeItem("pendaftarID");
-  localStorage.removeItem("userNama");
-  window.location.href = "login.html";
-});
+// Papar Top 10
+async function paparTop10() {
+  const { data, error } = await supabase
+    .from("pendaftar")
+    .select("nama, total_referral")
+    .order("total_referral", { ascending: false })
+    .limit(10);
+
+  const topList = document.getElementById("top10-list");
+  topList.innerHTML = "";
+
+  data.forEach((user, index) => {
+    const li = document.createElement("li");
+    li.textContent = `${index + 1}. ${user.nama} – ${user.total_referral} referral`;
+    topList.appendChild(li);
+  });
+}
+
+paparTop10();
