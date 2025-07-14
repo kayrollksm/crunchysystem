@@ -21,26 +21,21 @@
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
-      await fetchTopReferrers();
-      await fetchReferralSendiri();
-    });
+      // Auto buka tab pertama
+      openTab(event, 'top10');
 
-    async function fetchTopReferrers() {
-      const tableBody = document.getElementById("referral-body");
-
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("nama,pendaftar_id");
+      // Dapatkan data pendaftar
+      const { data, error } = await supabase.from("pendaftar").select("nama,pendaftar_id");
 
       if (error) return alert("Gagal ambil data utama: " + error.message);
 
       const referralCount = {};
-
       for (const p of data) {
         const { data: referred } = await supabase
           .from("pendaftar")
           .select("referral")
           .eq("referral", p.pendaftar_id);
+
         referralCount[p.pendaftar_id] = referred.length;
       }
 
@@ -53,7 +48,7 @@
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
-      tableBody.innerHTML = ranked.map((r, i) => `
+      document.getElementById("referral-body").innerHTML = ranked.map((r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${r.nama}</td>
@@ -61,60 +56,72 @@
           <td>${r.count}</td>
         </tr>
       `).join("");
-    }
+    });
 
-    async function fetchReferralSendiri() {
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("nama, pendaftar_id")
-        .eq("referral", pendaftarID);
+    window.openTab = (evt, tabName) => {
+      const tabs = document.getElementsByClassName("tab-content");
+      for (const tab of tabs) tab.style.display = "none";
 
-      const list = document.getElementById("referral-list");
+      const btns = document.getElementsByClassName("tablink");
+      for (const btn of btns) btn.classList.remove("active");
 
-      if (error || !data.length) {
-        list.innerHTML = "<li>Tiada referral lagi.</li>";
-        return;
-      }
-
-      list.innerHTML = data.map(p => `<li>${p.nama} (${p.pendaftar_id})</li>`).join("");
-    }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.classList.add("active");
+    };
   </script>
 
   <style>
-    body { font-family: Arial, sans-serif; padding: 30px; background: #f7f7f7; text-align: center; }
-    h2, h3 { color: #4B0082; }
-    table { width: 90%; margin: 20px auto; border-collapse: collapse; }
+    body { font-family: Arial; text-align: center; margin: 30px; }
+    .tablink {
+      padding: 10px 20px;
+      margin: 0 10px;
+      background-color: #eee;
+      border: none;
+      cursor: pointer;
+    }
+    .tablink.active {
+      background-color: purple;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+      margin-top: 20px;
+    }
+    table { margin: auto; border-collapse: collapse; width: 95%; }
     th, td { border: 1px solid #aaa; padding: 10px; }
     th { background-color: purple; color: white; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 6px 0; }
-    hr { margin: 30px 0; }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b>!<br>ID anda: <b><span id="user-id"></span></b></p>
+  <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
 
-  <hr>
+  <div>
+    <button class="tablink active" onclick="openTab(event, 'top10')">Top 10 Referral</button>
+    <button class="tablink" onclick="openTab(event, 'stats')">Statistik Saya</button>
+    <!-- Future Tab -->
+  </div>
 
-  <h3>Referral Saya</h3>
-  <ul id="referral-list">Loading...</ul>
+  <div id="top10" class="tab-content">
+    <h3>Top 10 Referral</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Nama</th>
+          <th>ID Pendaftar</th>
+          <th>Jumlah Referral</th>
+        </tr>
+      </thead>
+      <tbody id="referral-body">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <hr>
-
-  <h3>Top 10 Referral Ranking</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Nama</th>
-        <th>ID</th>
-        <th>Referral</th>
-      </tr>
-    </thead>
-    <tbody id="referral-body">
-      <tr><td colspan="4">Loading...</td></tr>
-    </tbody>
-  </table>
+  <div id="stats" class="tab-content">
+    <h3>Statistik Sendiri (COMING SOON)</h3>
+    <p>Jumlah referral sendiri, status tier, dan prestasi akan dipaparkan di sini.</p>
+  </div>
 </body>
 </html>
