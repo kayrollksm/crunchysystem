@@ -1,170 +1,90 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Dashboard Referral</title>
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
+    const supabaseKey = "<YOUR_SUPABASE_ANON_KEY>";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const pendaftarID = localStorage.getItem("pendaftarID");
-    const userNama = localStorage.getItem("userNama");
-
-    // ✅ Redirect ke login kalau belum login
-    if (!pendaftarID) {
-      window.location.href = "login.html";
-    }
-
     document.addEventListener("DOMContentLoaded", async () => {
-      document.getElementById("user-nama").innerText = userNama;
-      document.getElementById("user-id").innerText = pendaftarID;
-      document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`;
+      const id = localStorage.getItem("pendaftarID");
+      const nama = localStorage.getItem("userNama");
 
-      // Copy link
-      document.getElementById("copy-link").addEventListener("click", () => {
-        navigator.clipboard.writeText(`https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`);
-        alert("Link berjaya disalin!");
-      });
+      if (!id) {
+        window.location.href = 'login.html';
+        return;
+      }
 
-      // Logout
-      document.getElementById("logout").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "login.html";
-      });
+      document.getElementById("user-nama").innerText = nama;
+      document.getElementById("user-id").innerText = id;
 
-      // Simulasi pembelian
-      document.getElementById("beli-button").addEventListener("click", async () => {
-        const jumlah = parseInt(document.getElementById("jumlah-botol").value);
-        const totalRM = jumlah * 15;
-
-        const { error } = await supabase
-          .from("pendaftar")
-          .update({ jumlah_beli: jumlah, jumlah_rmsale: totalRM })
-          .eq("pendaftar_id", pendaftarID);
-
-        if (error) {
-          alert("Gagal kemaskini jualan");
-        } else {
-          alert("Jualan disimpan!");
-          window.location.reload();
-        }
-      });
-
-      // Dapatkan semua data
-      const { data, error } = await supabase
+      const { data: all, error } = await supabase
         .from("pendaftar")
-        .select("nama,pendaftar_id,referral,jumlah_rmsale");
+        .select("nama, pendaftar_id");
 
-      if (error) return alert("Gagal ambil data: " + error.message);
-
-      const referralCount = {};
-      data.forEach(p => {
-        if (p.referral) {
-          referralCount[p.referral] = (referralCount[p.referral] || 0) + 1;
-        }
-      });
-
-      // Kira sendiri
-      const current = data.find(d => d.pendaftar_id === pendaftarID);
-      const jumlahReferral = referralCount[pendaftarID] || 0;
-      const totalSale = current?.jumlah_rmsale || 0;
-      let tier = 1;
-      let komisen = "10%";
-      let note = "Tiada override";
-
-      if (totalSale >= 3000) {
-        tier = 2;
-        komisen = "13%";
-      }
-      if (totalSale >= 5000 && jumlahReferral >= 3) {
-        tier = 3;
-        komisen = "15% + override";
-        note = "Layak override";
-      }
-      if (totalSale >= 8000 && jumlahReferral >= 5) {
-        tier = 4;
-        komisen = "18% + override";
-      }
-      if (totalSale >= 10000 && jumlahReferral >= 10) {
-        tier = 5;
-        komisen = "20% + override";
+      if (error) {
+        return alert("Gagal ambil data utama: " + error.message);
       }
 
-      document.getElementById("total-sale").innerText = `RM${totalSale}`;
-      document.getElementById("total-referral").innerText = jumlahReferral;
-      document.getElementById("current-tier").innerText = `Tier ${tier}`;
-      document.getElementById("komisen-info").innerText = komisen;
-      document.getElementById("note-info").innerText = note;
+      const counts = {};
+      for (let u of all) {
+        const { data: refd } = await supabase
+          .from("pendaftar")
+          .select("referral")
+          .eq("referral", u.pendaftar_id);
 
-      // Ranking
-      const tableBody = document.getElementById("referral-body");
-      const ranked = data
-        .map(p => ({
-          nama: p.nama,
-          pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0
-        }))
-        .sort((a, b) => b.count - a.count);
+        counts[u.pendaftar_id] = refd.length;
+      }
 
-      tableBody.innerHTML = ranked.map((r, i) => `
+      const ranked = all
+        .map(u => ({ nama: u.nama, pendaftar_id: u.pendaftar_id, count: counts[u.pendaftar_id] || 0 }))
+        .sort((a,b) => b.count - a.count);
+
+      document.getElementById("referral-body").innerHTML = ranked.map((r,i) => `
         <tr>
-          <td>${i + 1}</td>
-          <td>${r.nama}</td>
-          <td>${r.pendaftar_id}</td>
-          <td>${r.count}</td>
+          <td>${i+1}</td><td>${r.nama}</td><td>${r.pendaftar_id}</td><td>${r.count}</td>
         </tr>
       `).join("");
     });
   </script>
   <style>
-    body { font-family: Arial; padding: 30px; }
-    .card { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #aaa; padding: 10px; text-align: center; }
-    th { background-color: purple; color: white; }
-    button { padding: 10px 20px; background-color: purple; color: white; border: none; cursor: pointer; border-radius: 6px; }
-    input { padding: 8px; width: 80px; }
+    body { font-family: Arial; text-align: center; margin-top: 40px; }
+    table { margin: auto; border-collapse: collapse; width: 90%; }
+    th, td { border: 1px solid #aaa; padding: 8px; }
+    th { background: purple; color: white; }
+    button {
+      position: fixed;
+      top: 20px; right: 20px;
+      padding: 8px 12px; background: gray; color: white;
+      border: none; cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <button id="logout">Logout</button>
   <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b> | ID: <b><span id="user-id"></span></b></p>
-  <p>Referral Link: <span id="referral-link"></span> <button id="copy-link">Copy</button></p>
-  <p><button id="logout">Logout</button></p>
+  <p>Selamat datang, <b><span id="user-nama"></span></b> — ID anda: <b><span id="user-id"></span></b></p>
 
-  <div class="card">
-    <h3>Status Anda</h3>
-    <p>Jualan Terkumpul: <b><span id="total-sale">RM0</span></b></p>
-    <p>Jumlah Referral: <b><span id="total-referral">0</span></b></p>
-    <p>Tier Semasa: <b><span id="current-tier">Tier 1</span></b></p>
-    <p>Komisen: <b><span id="komisen-info">10%</span></b></p>
-    <p><i><span id="note-info">Tiada override</span></i></p>
-  </div>
+  <h3>Top Referral Ranking</h3>
+  <table>
+    <thead>
+      <tr><th>Rank</th><th>Nama</th><th>ID Pendaftar</th><th>Jumlah Referral</th></tr>
+    </thead>
+    <tbody id="referral-body">
+      <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
 
-  <div class="card">
-    <h3>Simulasi Pembelian</h3>
-    <input type="number" id="jumlah-botol" value="1" min="1" />
-    <button id="beli-button">Beli (RM15 setiap satu)</button>
-  </div>
-
-  <div class="card">
-    <h3>Top Referral Ranking</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Nama</th>
-          <th>ID Pendaftar</th>
-          <th>Jumlah Referral</th>
-        </tr>
-      </thead>
-      <tbody id="referral-body">
-        <tr><td colspan="4">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <script>
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("pendaftarID");
+      localStorage.removeItem("userNama");
+      window.location.href = 'login.html';
+    });
+  </script>
 </body>
 </html>
