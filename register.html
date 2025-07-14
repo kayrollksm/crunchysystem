@@ -36,9 +36,16 @@
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
     const supabaseKey = "***REMOVED***";
-
     const supabase = createClient(supabaseUrl, supabaseKey);
+
     const form = document.getElementById("registerForm");
+
+    // 🎯 Prefill kod referral dari URL
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get("ref");
+    if (refCode) {
+      document.getElementById("referral").value = refCode.toUpperCase();
+    }
 
     function getNextBatch(referralCode) {
       if (!referralCode) return "A";
@@ -79,7 +86,7 @@
       }]);
 
       if (error) {
-        alert("Pendaftaran gagal: " + error.message);
+        alert("❌ Pendaftaran gagal: " + error.message);
       } else {
         localStorage.setItem("pendaftar_id", pendaftar_id);
         localStorage.setItem("email", email);
