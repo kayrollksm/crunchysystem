@@ -1,45 +1,50 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Anda</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - CrunchySystem</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h2 class="title">Dashboard Anda</h2>
-    <p>Nama: <span id="display-nama">ID</span></p>
-    <p>Jumlah Jualan: <span id="display-jualan">Loading...</span></p>
-    <p>Jumlah Referral: <span id="display-referral">Loading...</span></p>
-    <p>Tier Semasa: <span id="display-tier">Loading...</span></p>
-    <p>Komisen: <span id="display-komisen">Loading...</span></p>
-    <p>Override Komisen: <span id="display-override">Loading...</span></p>
+<body class="bg-gradient-to-br from-rose-50 to-yellow-50 min-h-screen p-6">
 
-    <div class="button-group">
-      <a href="thank.html" class="btn">Ke Halaman Terima Kasih</a>
-      <a href="pembelian.html" class="btn">Pembelian</a>
-      <button onclick="logout()" class="btn btn-red">Logout</button>
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-rose-200">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-2xl font-bold text-rose-600">Dashboard CrunchySystem</h2>
+        <p class="text-gray-600 text-sm">Selamat datang, <span id="nama-user" class="font-semibold text-gray-900">...</span></p>
+      </div>
+      <button onclick="logout()"
+        class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
+        Logout
+      </button>
     </div>
 
-    <h3 class="sub-title">Top Referral Ranking</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Nama</th>
-          <th>ID</th>
-          <th>Referral</th>
-          <th>Jualan</th>
-        </tr>
-      </thead>
-      <tbody id="ranking-table">
-        <tr><td colspan="5">Loading...</td></tr>
-      </tbody>
-    </table>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
+        <p class="text-gray-500 text-sm">ID Pendaftar</p>
+        <p id="id-user" class="text-lg font-bold text-rose-700">-</p>
+      </div>
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
+        <p class="text-gray-500 text-sm">Batch</p>
+        <p id="batch-user" class="text-lg font-bold text-rose-700">-</p>
+      </div>
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl col-span-2">
+        <p class="text-gray-500 text-sm">Jumlah Referral</p>
+        <p id="jumlah-referral" class="text-3xl font-bold text-rose-700">0</p>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-bold mb-2 text-gray-800">🏆 Top 10 Referrer</h3>
+      <ul id="top10-list" class="list-decimal pl-5 text-sm text-gray-700 space-y-1">
+        <li>Memuatkan data...</li>
+      </ul>
+    </div>
   </div>
 
-  <script src="supabase.js"></script>
+  <!-- Supabase SDK + dashboard script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="dashboard.js"></script>
 </body>
 </html>
