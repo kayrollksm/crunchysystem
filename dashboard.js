@@ -1,111 +1,30 @@
-const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-const supabaseKey = "***REMOVED***";
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co"; const supabaseKey = "***REMOVED***"; const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const pendaftar_id = localStorage.getItem("pendaftar_id");
-  const nama = localStorage.getItem("nama");
-  const batch = localStorage.getItem("batch");
+document.addEventListener("DOMContentLoaded", async () => { const pendaftar_id = localStorage.getItem("pendaftar_id"); const nama = localStorage.getItem("nama"); const tier = localStorage.getItem("batch");
 
-  // 🔐 Redirect jika tiada login
-  if (!pendaftar_id || !nama) {
-    window.location.href = "login.html";
-    return;
-  }
+if (!pendaftar_id || !nama) { window.location.href = "login.html"; return; }
 
-  // 👤 Papar data pengguna
-  document.getElementById("nama-user").textContent = nama ?? "-";
-  document.getElementById("id-user").textContent = pendaftar_id ?? "-";
-  document.getElementById("batch-user").textContent = batch ?? "-";
+document.getElementById("nama-user").textContent = nama ?? "-"; document.getElementById("id-user").textContent = pendaftar_id ?? "-"; document.getElementById("tier-user").textContent = tier ?? "-";
 
-  // 📊 Jumlah referral
-  const { count, error: referralErr } = await supabase
-    .from("pendaftar")
-    .select("id", { count: "exact" })
-    .eq("referral", pendaftar_id);
+// Jumlah referral const { count, error: referralErr } = await supabase .from("pendaftar") .select("id", { count: "exact" }) .eq("referral", pendaftar_id);
 
-  document.getElementById("jumlah-referral").textContent =
-    !referralErr ? count ?? 0 : "0";
+document.getElementById("jumlah-referral").textContent = !referralErr ? count ?? 0 : "0";
 
-  // 🏆 Papar Top 10 Referrer
-  const { data: topData, error: topErr } = await supabase
-    .from("pendaftar")
-    .select("nama, total_referral")
-    .order("total_referral", { ascending: false })
-    .limit(10);
+// Total jualan referral const { data: sales, error: salesErr } = await supabase .from("pembelian") .select("jumlah") .in("pendaftar_id", await getReferralIds(pendaftar_id));
 
-  const topList = document.getElementById("top10-list");
-  topList.innerHTML = "";
+const totalJualan = !salesErr && sales ? sales.reduce((sum, s) => sum + (s.jumlah || 0), 0) : 0; document.getElementById("total-jualan").textContent = totalJualan.toLocaleString();
 
-  if (!topErr && topData?.length > 0) {
-    topData.forEach((user, index) => {
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${user.nama} – ${user.total_referral ?? 0} referral`;
-      topList.appendChild(li);
-    });
-  } else {
-    topList.innerHTML = "<li>Tiada data.</li>";
-  }
+// Komisen (10% dari jualan referral) const komisen = Math.round(totalJualan * 0.1); document.getElementById("total-komisen").textContent = komisen.toLocaleString();
 
-  // 📦 Paparkan senarai pembelian
-  await loadPembelian();
+// Top 10 Referrer const { data: topData, error: topErr } = await supabase .from("pendaftar") .select("nama, total_referral") .order("total_referral", { ascending: false }) .limit(10);
 
-  // 🛒 Simpan pembelian baru
-  const pembelianForm = document.getElementById("form-pembelian");
-  if (pembelianForm) {
-    pembelianForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+const topList = document.getElementById("top10-list"); topList.innerHTML = "";
 
-      const namaProduk = document.getElementById("nama-produk").value.trim();
-      const jumlah = parseInt(document.getElementById("jumlah").value.trim());
+if (!topErr && topData.length > 0) { topData.forEach((user, index) => { const li = document.createElement("li"); li.textContent = ${index + 1}. ${user.nama} – ${user.total_referral ?? 0} referral; topList.appendChild(li); }); } else { topList.innerHTML = "<li>Tiada data.</li>"; } });
 
-      if (!namaProduk || isNaN(jumlah)) {
-        alert("❌ Sila isi semua maklumat dengan betul.");
-        return;
-      }
+// Dapatkan semua ID referral async function getReferralIds(pendaftar_id) { const { data, error } = await supabase .from("pendaftar") .select("pendaftar_id") .eq("referral", pendaftar_id);
 
-      const { error } = await supabase.from("pembelian").insert([
-        { pendaftar_id, nama_produk: namaProduk, jumlah }
-      ]);
+if (error || !data) return []; return data.map((row) => row.pendaftar_id); }
 
-      if (error) {
-        alert("❌ Gagal simpan pembelian: " + error.message);
-      } else {
-        alert("✅ Pembelian berjaya disimpan!");
-        pembelianForm.reset();
-        await loadPembelian();
-      }
-    });
-  }
-});
+function logout() { localStorage.clear(); window.location.href = "login.html"; }
 
-// 📦 Load senarai pembelian pengguna semasa
-async function loadPembelian() {
-  const pendaftar_id = localStorage.getItem("pendaftar_id");
-  const list = document.getElementById("senarai-pembelian");
-  list.innerHTML = "<li>Memuatkan data...</li>";
-
-  const { data, error } = await supabase
-    .from("pembelian")
-    .select("*")
-    .eq("pendaftar_id", pendaftar_id)
-    .order("created_at", { ascending: false });
-
-  if (error || !data || data.length === 0) {
-    list.innerHTML = "<li>Tiada rekod pembelian.</li>";
-    return;
-  }
-
-  list.innerHTML = "";
-  data.forEach((item) => {
-    const li = document.createElement("li");
-    li.textContent = `🛒 ${item.nama_produk} - ${item.jumlah} unit`;
-    list.appendChild(li);
-  });
-}
-
-// 🔓 Logout
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
