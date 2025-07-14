@@ -7,159 +7,117 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey =
-      "***REMOVED***";
+    const supabaseKey = "***REMOVED***";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const pendaftarID = localStorage.getItem("pendaftarID");
     const userNama = localStorage.getItem("userNama");
 
-    if (!pendaftarID) {
-      window.location.href = "login.html";
-    }
+    if (!pendaftarID) window.location.href = "login.html";
 
     document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("user-nama").innerText = userNama;
       document.getElementById("user-id").innerText = pendaftarID;
 
+      // === Top 10 Referral ===
       const tableBody = document.getElementById("referral-body");
 
       const { data, error } = await supabase
         .from("pendaftar")
         .select("nama,pendaftar_id");
 
-      if (error) {
-        alert("Gagal ambil data utama: " + error.message);
-        return;
-      }
+      if (error) return alert("Gagal ambil data: " + error.message);
 
       const referralCount = {};
-
       for (const p of data) {
         const { data: referred } = await supabase
           .from("pendaftar")
           .select("referral")
           .eq("referral", p.pendaftar_id);
-
-        referralCount[p.pendaftar_id] = referred?.length ?? 0;
+        referralCount[p.pendaftar_id] = referred.length;
       }
 
       const ranked = data
         .map(p => ({
           nama: p.nama,
           pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0,
+          count: referralCount[p.pendaftar_id] || 0
         }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10); // Top 10
+        .sort((a, b) => b.count - a.count);
 
-      tableBody.innerHTML = ranked
-        .map(
-          (r, i) => `
+      tableBody.innerHTML = ranked.map((r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${r.nama}</td>
           <td>${r.pendaftar_id}</td>
           <td>${r.count}</td>
         </tr>
-      `
-        )
-        .join("");
+      `).join("");
+
+      // === Statistik Sendiri ===
+      const { data: myReferrals } = await supabase
+        .from("pendaftar")
+        .select("id")
+        .eq("referral", pendaftarID);
+
+      document.getElementById("my-referral-count").innerText = myReferrals.length;
+      document.getElementById("my-referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`;
     });
+
+    // Tab switch
+    window.showTab = function (tab) {
+      document.getElementById("top10").style.display = tab === 'top10' ? 'block' : 'none';
+      document.getElementById("statistik").style.display = tab === 'statistik' ? 'block' : 'none';
+    };
+
+    // Copy
+    window.copyLink = function () {
+      const link = document.getElementById("my-referral-link").innerText;
+      navigator.clipboard.writeText(link);
+      alert("Link disalin!");
+    };
   </script>
   <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      margin-top: 40px;
-    }
-
-    table {
-      margin: auto;
-      border-collapse: collapse;
-      width: 90%;
-    }
-
-    th,
-    td {
-      border: 1px solid #aaa;
-      padding: 10px;
-    }
-
-    th {
-      background-color: purple;
-      color: white;
-    }
-
-    .tab-buttons {
-      margin: 20px 0;
-    }
-
-    .tab-buttons button {
-      padding: 8px 16px;
-      margin: 0 5px;
-      border: none;
-      background-color: #ddd;
-      cursor: pointer;
-    }
-
-    .tab-buttons button.active {
-      background-color: purple;
-      color: white;
-    }
-
-    #tab-content {
-      margin-top: 20px;
-    }
+    body { font-family: Arial; text-align: center; margin-top: 30px; }
+    table { margin: auto; border-collapse: collapse; width: 90%; }
+    th, td { border: 1px solid #aaa; padding: 10px; }
+    th { background-color: purple; color: white; }
+    .tab-btn { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    .purple-btn { background: purple; color: white; border: none; }
+    .gray-btn { background: #eee; color: #333; border: none; }
+    .box { margin-top: 20px; }
   </style>
 </head>
 <body>
   <h2>Dashboard Referral</h2>
   <p>Selamat datang, <b><span id="user-nama"></span></b>! ID anda: <b><span id="user-id"></span></b></p>
 
-  <div class="tab-buttons">
-    <button class="active" onclick="showTab('top')">Top 10 Referral</button>
-    <button onclick="showTab('stat')">Statistik Saya</button>
+  <button class="tab-btn purple-btn" onclick="showTab('top10')">Top 10 Referral</button>
+  <button class="tab-btn gray-btn" onclick="showTab('statistik')">Statistik Saya</button>
+
+  <div id="top10">
+    <h3>Top Referral Ranking</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Nama</th>
+          <th>ID Pendaftar</th>
+          <th>Jumlah Referral</th>
+        </tr>
+      </thead>
+      <tbody id="referral-body">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <div id="tab-content">
-    <div id="tab-top">
-      <h3>Top 10 Referral</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Nama</th>
-            <th>ID Pendaftar</th>
-            <th>Jumlah Referral</th>
-          </tr>
-        </thead>
-        <tbody id="referral-body">
-          <tr>
-            <td colspan="4">Loading...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div id="tab-stat" style="display: none;">
-      <p>Statistik anda akan ditambah di sini nanti.</p>
+  <div id="statistik" style="display: none;">
+    <div class="box">
+      <p>Jumlah Referral Anda: <b><span id="my-referral-count">0</span></b></p>
+      <p>Link Referral: <span id="my-referral-link"></span></p>
+      <button onclick="copyLink()">Salin Link</button>
     </div>
   </div>
-
-  <script>
-    function showTab(tab) {
-      document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
-      if (tab === "top") {
-        document.getElementById("tab-top").style.display = "block";
-        document.getElementById("tab-stat").style.display = "none";
-        document.querySelector(".tab-buttons button:nth-child(1)").classList.add("active");
-      } else {
-        document.getElementById("tab-top").style.display = "none";
-        document.getElementById("tab-stat").style.display = "block";
-        document.querySelector(".tab-buttons button:nth-child(2)").classList.add("active");
-      }
-    }
-  </script>
 </body>
 </html>
