@@ -6,89 +6,61 @@
   <title>Dashboard - CrunchySystem</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-rose-50 to-yellow-50 min-h-screen p-6">
+<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen py-10 px-4">
+  <div class="max-w-3xl mx-auto space-y-8">
 
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-rose-200 space-y-8">
-    
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold text-rose-600">Dashboard CrunchySystem</h2>
-        <p class="text-sm text-gray-600">Hai, <span id="nama-user" class="font-semibold text-gray-900">-</span></p>
-      </div>
+    <!-- 👤 Profil Pengguna -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-rose-200">
+      <h2 class="text-2xl font-bold text-rose-600 mb-2">Selamat Datang, <span id="nama-user">-</span></h2>
+      <p class="text-sm text-gray-700">ID: <span id="id-user">-</span></p>
+      <p class="text-sm text-gray-700">Batch: <span id="batch-user">-</span></p>
       <button onclick="logout()"
-        class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
-        Logout
+        class="mt-4 bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-sm">
+        Log Keluar
       </button>
     </div>
 
-    <!-- Info Panel -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
-        <p class="text-gray-500 text-sm">ID Pendaftar</p>
-        <p id="id-user" class="text-lg font-bold text-rose-700">-</p>
-      </div>
-      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
-        <p class="text-gray-500 text-sm">Batch</p>
-        <p id="batch-user" class="text-lg font-bold text-rose-700">-</p>
-      </div>
-      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
-        <p class="text-gray-500 text-sm">Jumlah Referral</p>
-        <p id="jumlah-referral" class="text-3xl font-bold text-rose-700">0</p>
-      </div>
+    <!-- 👥 Jumlah Referral -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-rose-200">
+      <h3 class="text-xl font-bold text-rose-600 mb-2">Referral Anda</h3>
+      <p class="text-3xl font-extrabold text-gray-800" id="jumlah-referral">0</p>
     </div>
 
-    <!-- Top 10 Referrer -->
-    <div>
-      <h3 class="text-lg font-bold mb-2 text-gray-800">🏆 Top 10 Referrer</h3>
-      <ul id="top10-list" class="list-decimal pl-5 text-sm text-gray-700 space-y-1">
+    <!-- 🏆 Top 10 Referrer -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-rose-200">
+      <h3 class="text-xl font-bold text-rose-600 mb-2">Top 10 Referral</h3>
+      <ul id="top10-list" class="text-sm text-gray-700 space-y-1">
         <li>Memuatkan data...</li>
       </ul>
     </div>
 
-    <!-- 🛒 Simulator Pembelian -->
-    <div class="pt-4 border-t border-rose-200">
-      <h3 class="text-lg font-bold text-gray-800 mb-2">🛒 Simulator Pembelian</h3>
-      <p class="text-sm text-gray-600 mb-4">Ruang untuk uji logik pembelian & naikkan rank referrer secara manual.</p>
-      <div class="flex flex-col sm:flex-row items-center gap-3">
-        <input type="number" id="jumlah-pembelian" placeholder="Contoh: 1" class="px-4 py-2 border rounded-xl w-full sm:w-auto" />
-        <button onclick="simulasiPembelian()"
-          class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold text-sm">
-          Simulasikan Pembelian
+    <!-- 💸 Simulator Pembelian -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-rose-200">
+      <h3 class="text-xl font-bold text-rose-600 mb-4">Simulator Pembelian</h3>
+
+      <form id="form-pembelian" class="space-y-4">
+        <input type="text" id="nama-produk" placeholder="Nama Produk"
+          class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400" required />
+
+        <input type="number" id="jumlah" placeholder="Jumlah"
+          class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400" required />
+
+        <button type="submit"
+          class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded-xl transition">
+          Simpan Pembelian
         </button>
+      </form>
+
+      <div class="mt-6">
+        <h4 class="text-md font-semibold text-gray-700 mb-2">Rekod Pembelian Anda:</h4>
+        <ul id="senarai-pembelian" class="text-sm text-gray-600 space-y-1">
+          <li>Memuatkan data...</li>
+        </ul>
       </div>
-      <p id="simulasi-msg" class="text-sm text-green-600 mt-3 hidden">Berjaya tambah pembelian!</p>
     </div>
+
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="dashboard.js"></script>
-  <script src="logout.js"></script>
-  <script>
-    // 🚀 Simulator Pembelian (dummy logic)
-    async function simulasiPembelian() {
-      const jumlah = parseInt(document.getElementById("jumlah-pembelian").value) || 0;
-      const id = localStorage.getItem("pendaftar_id");
-
-      if (!jumlah || jumlah < 1) {
-        alert("Masukkan jumlah sah.");
-        return;
-      }
-
-      // Dummy: update total_referral secara manual
-      const { error } = await supabase
-        .from("pendaftar")
-        .update({ total_referral: jumlah })
-        .eq("pendaftar_id", id);
-
-      if (error) {
-        alert("Gagal update: " + error.message);
-      } else {
-        document.getElementById("simulasi-msg").classList.remove("hidden");
-        setTimeout(() => window.location.reload(), 1200);
-      }
-    }
-  </script>
 </body>
 </html>
