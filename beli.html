@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulator Pembelian</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">  <div class="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-rose-200">
+    <h2 class="text-2xl font-bold text-center text-rose-600 mb-4">Simulator Pembelian</h2><form id="form-beli" class="space-y-4">
+  <input type="text" id="nama_produk" name="nama_produk" placeholder="Nama Produk" required
+    class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400" />
+
+  <input type="number" id="jumlah" name="jumlah" placeholder="Jumlah" required min="1"
+    class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400" />
+
+  <button type="submit"
+    class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded-xl transition">
+    Simpan Pembelian
+  </button>
+</form>
+
+<div id="status-msg" class="text-center text-sm text-rose-600 mt-4 hidden">...</div>
+
+  </div>  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+    const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+    const supabaseKey = "***REMOVED***";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const form = document.getElementById("form-beli");
+    const msg = document.getElementById("status-msg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const pendaftar_id = localStorage.getItem("pendaftar_id");
+      if (!pendaftar_id) {
+        msg.textContent = "Sesi tamat. Sila login semula.";
+        msg.classList.remove("hidden");
+        return;
+      }
+
+      const nama_produk = form.nama_produk.value.trim();
+      const jumlah = parseInt(form.jumlah.value.trim());
+
+      const { error } = await supabase.from("pembelian").insert([{
+        pendaftar_id,
+        nama_produk,
+        jumlah
+      }]);
+
+      if (error) {
+        msg.textContent = "❌ Gagal simpan pembelian.";
+      } else {
+        msg.textContent = "✅ Pembelian berjaya disimpan!";
+        form.reset();
+      }
+      msg.classList.remove("hidden");
+    });
+  </script></body>
+</html>
