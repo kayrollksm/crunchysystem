@@ -1,170 +1,79 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <title>Dashboard Referral</title>
+  <meta charset="UTF-8">
+  <title>Daftar Mouthgasm Crunchy</title>
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
     const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-    const supabaseKey = "***REMOVED***";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const pendaftarID = localStorage.getItem("pendaftarID");
-    const userNama = localStorage.getItem("userNama");
+    const form = document.getElementById("registerForm");
 
-    // ✅ Redirect ke login kalau belum login
-    if (!pendaftarID) {
-      window.location.href = "login.html";
+    function getNextBatch(referralCode) {
+      if (!referralCode) return "A"; // Direct HQ
+      const lastChar = referralCode.slice(-1).toUpperCase();
+      if (/^[A-Z]$/.test(lastChar)) {
+        return String.fromCharCode(lastChar.charCodeAt(0) + 1);
+      } else if (/^[A-Z]{2}$/.test(lastChar)) {
+        // Contoh: Z → AA
+        return "AA"; // (optional: tambah logik lebih lanjut)
+      } else {
+        return "A";
+      }
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      document.getElementById("user-nama").innerText = userNama;
-      document.getElementById("user-id").innerText = pendaftarID;
-      document.getElementById("referral-link").innerText = `https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`;
+    function generateRandomNumber(length = 5) {
+      const max = Math.pow(10, length);
+      return Math.floor(Math.random() * max).toString().padStart(length, "0");
+    }
 
-      // Copy link
-      document.getElementById("copy-link").addEventListener("click", () => {
-        navigator.clipboard.writeText(`https://kayrollksm.github.io/crunchysystem/?ref=${pendaftarID}`);
-        alert("Link berjaya disalin!");
-      });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-      // Logout
-      document.getElementById("logout").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "login.html";
-      });
+      const nama = form.nama.value.trim();
+      const telefon = form.telefon.value.trim();
+      const email = form.email.value.trim();
+      const referral = form.referral.value.trim().toUpperCase();
 
-      // Simulasi pembelian
-      document.getElementById("beli-button").addEventListener("click", async () => {
-        const jumlah = parseInt(document.getElementById("jumlah-botol").value);
-        const totalRM = jumlah * 15;
+      const batch = getNextBatch(referral);
+      const randomNo = generateRandomNumber();
+      const pendaftar_id = `MC${randomNo}${batch}`;
 
-        const { error } = await supabase
-          .from("pendaftar")
-          .update({ jumlah_beli: jumlah, jumlah_rmsale: totalRM })
-          .eq("pendaftar_id", pendaftarID);
+      const { error } = await supabase.from("pendaftar").insert([{
+        nama,
+        telefon,
+        email,
+        referral,
+        pendaftar_id,
+        batch
+      }]);
 
-        if (error) {
-          alert("Gagal kemaskini jualan");
-        } else {
-          alert("Jualan disimpan!");
-          window.location.reload();
-        }
-      });
-
-      // Dapatkan semua data
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("nama,pendaftar_id,referral,jumlah_rmsale");
-
-      if (error) return alert("Gagal ambil data: " + error.message);
-
-      const referralCount = {};
-      data.forEach(p => {
-        if (p.referral) {
-          referralCount[p.referral] = (referralCount[p.referral] || 0) + 1;
-        }
-      });
-
-      // Kira sendiri
-      const current = data.find(d => d.pendaftar_id === pendaftarID);
-      const jumlahReferral = referralCount[pendaftarID] || 0;
-      const totalSale = current?.jumlah_rmsale || 0;
-      let tier = 1;
-      let komisen = "10%";
-      let note = "Tiada override";
-
-      if (totalSale >= 3000) {
-        tier = 2;
-        komisen = "13%";
+      if (error) {
+        alert("Pendaftaran gagal: " + error.message);
+      } else {
+        localStorage.setItem("pendaftarID", pendaftar_id);
+        localStorage.setItem("userNama", nama);
+        window.location.href = "thank.html";
       }
-      if (totalSale >= 5000 && jumlahReferral >= 3) {
-        tier = 3;
-        komisen = "15% + override";
-        note = "Layak override";
-      }
-      if (totalSale >= 8000 && jumlahReferral >= 5) {
-        tier = 4;
-        komisen = "18% + override";
-      }
-      if (totalSale >= 10000 && jumlahReferral >= 10) {
-        tier = 5;
-        komisen = "20% + override";
-      }
-
-      document.getElementById("total-sale").innerText = `RM${totalSale}`;
-      document.getElementById("total-referral").innerText = jumlahReferral;
-      document.getElementById("current-tier").innerText = `Tier ${tier}`;
-      document.getElementById("komisen-info").innerText = komisen;
-      document.getElementById("note-info").innerText = note;
-
-      // Ranking
-      const tableBody = document.getElementById("referral-body");
-      const ranked = data
-        .map(p => ({
-          nama: p.nama,
-          pendaftar_id: p.pendaftar_id,
-          count: referralCount[p.pendaftar_id] || 0
-        }))
-        .sort((a, b) => b.count - a.count);
-
-      tableBody.innerHTML = ranked.map((r, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${r.nama}</td>
-          <td>${r.pendaftar_id}</td>
-          <td>${r.count}</td>
-        </tr>
-      `).join("");
     });
   </script>
   <style>
-    body { font-family: Arial; padding: 30px; }
-    .card { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #aaa; padding: 10px; text-align: center; }
-    th { background-color: purple; color: white; }
-    button { padding: 10px 20px; background-color: purple; color: white; border: none; cursor: pointer; border-radius: 6px; }
-    input { padding: 8px; width: 80px; }
+    body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
+    input { margin: 10px 0; padding: 10px; width: 300px; }
+    button { padding: 10px 30px; background-color: purple; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>Dashboard Referral</h2>
-  <p>Selamat datang, <b><span id="user-nama"></span></b> | ID: <b><span id="user-id"></span></b></p>
-  <p>Referral Link: <span id="referral-link"></span> <button id="copy-link">Copy</button></p>
-  <p><button id="logout">Logout</button></p>
-
-  <div class="card">
-    <h3>Status Anda</h3>
-    <p>Jualan Terkumpul: <b><span id="total-sale">RM0</span></b></p>
-    <p>Jumlah Referral: <b><span id="total-referral">0</span></b></p>
-    <p>Tier Semasa: <b><span id="current-tier">Tier 1</span></b></p>
-    <p>Komisen: <b><span id="komisen-info">10%</span></b></p>
-    <p><i><span id="note-info">Tiada override</span></i></p>
-  </div>
-
-  <div class="card">
-    <h3>Simulasi Pembelian</h3>
-    <input type="number" id="jumlah-botol" value="1" min="1" />
-    <button id="beli-button">Beli (RM15 setiap satu)</button>
-  </div>
-
-  <div class="card">
-    <h3>Top Referral Ranking</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Nama</th>
-          <th>ID Pendaftar</th>
-          <th>Jumlah Referral</th>
-        </tr>
-      </thead>
-      <tbody id="referral-body">
-        <tr><td colspan="4">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <h2>Daftar Mouthgasm Crunchy</h2>
+  <form id="registerForm">
+    <input type="text" id="nama" name="nama" placeholder="Nama Penuh" required><br>
+    <input type="text" id="telefon" name="telefon" placeholder="No Telefon" required><br>
+    <input type="email" id="email" name="email" placeholder="Email" required><br>
+    <input type="text" id="referral" name="referral" placeholder="Kod Referral (jika ada)"><br>
+    <button type="submit">Daftar Sekarang</button>
+  </form>
 </body>
 </html>
