@@ -1,58 +1,94 @@
-const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-const supabaseKey = "***REMOVED***";
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - CrunchySystem</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-rose-50 to-yellow-50 min-h-screen p-6">
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const pendaftar_id = localStorage.getItem("pendaftar_id");
-  const nama = localStorage.getItem("nama");
-  const batch = localStorage.getItem("batch");
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-rose-200 space-y-8">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-rose-600">Dashboard CrunchySystem</h2>
+        <p class="text-sm text-gray-600">Hai, <span id="nama-user" class="font-semibold text-gray-900">-</span></p>
+      </div>
+      <button onclick="logout()"
+        class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
+        Logout
+      </button>
+    </div>
 
-  // 🛡 Redirect ke login kalau tiada session
-  if (!pendaftar_id || !nama) {
-    window.location.href = "login.html";
-    return;
-  }
+    <!-- Info Panel -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
+        <p class="text-gray-500 text-sm">ID Pendaftar</p>
+        <p id="id-user" class="text-lg font-bold text-rose-700">-</p>
+      </div>
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
+        <p class="text-gray-500 text-sm">Batch</p>
+        <p id="batch-user" class="text-lg font-bold text-rose-700">-</p>
+      </div>
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl">
+        <p class="text-gray-500 text-sm">Jumlah Referral</p>
+        <p id="jumlah-referral" class="text-3xl font-bold text-rose-700">0</p>
+      </div>
+    </div>
 
-  // 🧾 Papar data pengguna
-  document.getElementById("nama-user").textContent = nama ?? "-";
-  document.getElementById("id-user").textContent = pendaftar_id ?? "-";
-  document.getElementById("batch-user").textContent = batch ?? "-";
+    <!-- Top 10 Referrer -->
+    <div>
+      <h3 class="text-lg font-bold mb-2 text-gray-800">🏆 Top 10 Referrer</h3>
+      <ul id="top10-list" class="list-decimal pl-5 text-sm text-gray-700 space-y-1">
+        <li>Memuatkan data...</li>
+      </ul>
+    </div>
 
-  // 📊 Jumlah referral
-  const { count, error: referralErr } = await supabase
-    .from("pendaftar")
-    .select("id", { count: "exact" })
-    .eq("referral", pendaftar_id);
+    <!-- 🛒 Simulator Pembelian -->
+    <div class="pt-4 border-t border-rose-200">
+      <h3 class="text-lg font-bold text-gray-800 mb-2">🛒 Simulator Pembelian</h3>
+      <p class="text-sm text-gray-600 mb-4">Ruang untuk uji logik pembelian & naikkan rank referrer secara manual.</p>
+      <div class="flex flex-col sm:flex-row items-center gap-3">
+        <input type="number" id="jumlah-pembelian" placeholder="Contoh: 1" class="px-4 py-2 border rounded-xl w-full sm:w-auto" />
+        <button onclick="simulasiPembelian()"
+          class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold text-sm">
+          Simulasikan Pembelian
+        </button>
+      </div>
+      <p id="simulasi-msg" class="text-sm text-green-600 mt-3 hidden">Berjaya tambah pembelian!</p>
+    </div>
+  </div>
 
-  if (!referralErr) {
-    document.getElementById("jumlah-referral").textContent = count ?? 0;
-  } else {
-    document.getElementById("jumlah-referral").textContent = "0";
-  }
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="dashboard.js"></script>
+  <script src="logout.js"></script>
+  <script>
+    // 🚀 Simulator Pembelian (dummy logic)
+    async function simulasiPembelian() {
+      const jumlah = parseInt(document.getElementById("jumlah-pembelian").value) || 0;
+      const id = localStorage.getItem("pendaftar_id");
 
-  // 🏆 Papar Top 10 Referrer
-  const { data: topData, error: topErr } = await supabase
-    .from("pendaftar")
-    .select("nama, total_referral")
-    .order("total_referral", { ascending: false })
-    .limit(10);
+      if (!jumlah || jumlah < 1) {
+        alert("Masukkan jumlah sah.");
+        return;
+      }
 
-  const topList = document.getElementById("top10-list");
-  topList.innerHTML = "";
+      // Dummy: update total_referral secara manual
+      const { error } = await supabase
+        .from("pendaftar")
+        .update({ total_referral: jumlah })
+        .eq("pendaftar_id", id);
 
-  if (!topErr && topData.length > 0) {
-    topData.forEach((user, index) => {
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${user.nama} – ${user.total_referral ?? 0} referral`;
-      topList.appendChild(li);
-    });
-  } else {
-    topList.innerHTML = "<li>Tiada data.</li>";
-  }
-});
-
-// 🔓 Logout
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
+      if (error) {
+        alert("Gagal update: " + error.message);
+      } else {
+        document.getElementById("simulasi-msg").classList.remove("hidden");
+        setTimeout(() => window.location.reload(), 1200);
+      }
+    }
+  </script>
+</body>
+</html>
