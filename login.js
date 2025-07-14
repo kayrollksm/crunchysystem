@@ -1,6 +1,6 @@
 // login.js
-const supabaseUrl = "https://xxxx.supabase.co"; // GANTI dgn url sebenar
-const supabaseKey = "eyJhbGciOi..."; // GANTI dgn anon key sebenar
+const supabaseUrl = "https://mbtovkknnkynbixvqxtp.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1idG92a2tubmt5bmJpeHZxeHRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI2NzkzNDcsImV4cCI6MjAyODI1NTM0N30.CvGQ5oStajMRP6IO1Bh0VFE0reK0Kkb-SMDtubwnFCg";
 
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -22,10 +22,11 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     return;
   }
 
-  // Simpan dalam localStorage (atau sessionStorage)
+  // Simpan data dalam localStorage
   localStorage.setItem("pendaftar_id", data.pendaftar_id);
   localStorage.setItem("email", data.email);
-  localStorage.setItem("nama", data.nama); // kalau nak guna dalam dashboard
+  localStorage.setItem("nama", data.nama);
+  localStorage.setItem("batch", data.batch);
 
   // Redirect ke dashboard
   window.location.href = "dashboard.html";
