@@ -1,30 +1,53 @@
-const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co"; const supabaseKey = "***REMOVED***"; const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// dashboard.js
 
-document.addEventListener("DOMContentLoaded", async () => { const pendaftar_id = localStorage.getItem("pendaftar_id"); const nama = localStorage.getItem("nama"); const tier = localStorage.getItem("batch");
+const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
+const supabaseKey = "***REMOVED***";
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-if (!pendaftar_id || !nama) { window.location.href = "login.html"; return; }
+document.addEventListener("DOMContentLoaded", async () => {
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
-document.getElementById("nama-user").textContent = nama ?? "-"; document.getElementById("id-user").textContent = pendaftar_id ?? "-"; document.getElementById("tier-user").textContent = tier ?? "-";
+  if (!user || !user.pendaftar_id) {
+    window.location.href = "login.html";
+    return;
+  }
 
-// Jumlah referral const { count, error: referralErr } = await supabase .from("pendaftar") .select("id", { count: "exact" }) .eq("referral", pendaftar_id);
+  // Paparkan info pengguna
+  document.getElementById("userName").textContent = user.nama ?? "-";
+  document.getElementById("userId").textContent = user.pendaftar_id ?? "-";
+  document.getElementById("userTier").textContent = user.tier ?? "-";
+  document.getElementById("userRef").textContent = user.referral ?? "-";
+  document.getElementById("userTotalSale").textContent = user.total_sale?.toFixed(2) ?? "0.00";
+  document.getElementById("userTotalCommission").textContent = user.total_commission?.toFixed(2) ?? "0.00";
+  document.getElementById("userJumlahReferral").textContent = user.jumlah_referral ?? "0";
 
-document.getElementById("jumlah-referral").textContent = !referralErr ? count ?? 0 : "0";
+  // Link referral
+  const refLink = `${window.location.origin}/register.html?ref=${user.pendaftar_id}`;
+  document.getElementById("referralLink").value = refLink;
 
-// Total jualan referral const { data: sales, error: salesErr } = await supabase .from("pembelian") .select("jumlah") .in("pendaftar_id", await getReferralIds(pendaftar_id));
+  // Top 10 Referrer
+  const { data: topList, error: topErr } = await supabase
+    .from("pendaftar")
+    .select("nama, jumlah_referral, total_sale")
+    .order("jumlah_referral", { ascending: false })
+    .limit(10);
 
-const totalJualan = !salesErr && sales ? sales.reduce((sum, s) => sum + (s.jumlah || 0), 0) : 0; document.getElementById("total-jualan").textContent = totalJualan.toLocaleString();
+  const topUl = document.getElementById("top10-list");
+  topUl.innerHTML = "";
 
-// Komisen (10% dari jualan referral) const komisen = Math.round(totalJualan * 0.1); document.getElementById("total-komisen").textContent = komisen.toLocaleString();
+  if (!topErr && topList) {
+    topList.forEach((u, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${i + 1}. ${u.nama} - ${u.jumlah_referral ?? 0} referral - RM${u.total_sale?.toFixed(2) ?? "0.00"}`;
+      topUl.appendChild(li);
+    });
+  } else {
+    topUl.innerHTML = "<li>Tiada data.</li>";
+  }
+});
 
-// Top 10 Referrer const { data: topData, error: topErr } = await supabase .from("pendaftar") .select("nama, total_referral") .order("total_referral", { ascending: false }) .limit(10);
-
-const topList = document.getElementById("top10-list"); topList.innerHTML = "";
-
-if (!topErr && topData.length > 0) { topData.forEach((user, index) => { const li = document.createElement("li"); li.textContent = ${index + 1}. ${user.nama} – ${user.total_referral ?? 0} referral; topList.appendChild(li); }); } else { topList.innerHTML = "<li>Tiada data.</li>"; } });
-
-// Dapatkan semua ID referral async function getReferralIds(pendaftar_id) { const { data, error } = await supabase .from("pendaftar") .select("pendaftar_id") .eq("referral", pendaftar_id);
-
-if (error || !data) return []; return data.map((row) => row.pendaftar_id); }
-
-function logout() { localStorage.clear(); window.location.href = "login.html"; }
-
+// Logout
+function logout() {
+  sessionStorage.clear();
+  window.location.href = "login.html";
+}
