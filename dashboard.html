@@ -1,53 +1,56 @@
-<!DOCTYPE html><html lang="ms">
+<!DOCTYPE html>
+<html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard - CrunchySystem</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-rose-200 text-center">
-    <h2 class="text-2xl font-bold text-rose-600 mb-2">Dashboard<br />CrunchySystem</h2>
-    <p class="text-sm text-gray-600 mb-4">Selamat datang, <span id="nama-user">...</span></p><div class="grid grid-cols-2 gap-4 mb-4">
-  <div class="bg-rose-50 p-3 rounded-xl">
-    <p class="text-xs text-gray-500">ID Pendaftar</p>
-    <p id="id-user" class="font-bold text-rose-700">-</p>
+<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-rose-200 p-6 space-y-6">
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-rose-600">Dashboard Pengguna</h2>
+      <button onclick="logout()" class="text-sm bg-gray-800 hover:bg-gray-900 text-white px-4 py-1 rounded-xl">Log Keluar</button>
+    </div>
+
+    <!-- Info Pengguna -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+      <div><span class="font-semibold">Nama:</span> <span id="userName">-</span></div>
+      <div><span class="font-semibold">ID:</span> <span id="userId">-</span></div>
+      <div><span class="font-semibold">Tier:</span> <span id="userTier">-</span></div>
+      <div><span class="font-semibold">Referral:</span> <span id="userRef">-</span></div>
+      <div><span class="font-semibold">Total Sale (RM):</span> <span id="userTotalSale">0.00</span></div>
+      <div><span class="font-semibold">Komisen (RM):</span> <span id="userTotalCommission">0.00</span></div>
+      <div><span class="font-semibold">Jumlah Referral:</span> <span id="userJumlahReferral">0</span></div>
+    </div>
+
+    <!-- Referral Link -->
+    <div class="mt-4">
+      <p class="text-sm text-gray-500 mb-1">Link Referral anda:</p>
+      <div class="flex items-center gap-2">
+        <input id="referralLink" class="w-full px-3 py-2 border rounded-xl text-sm" readonly />
+        <button onclick="copyLink()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm">Copy</button>
+      </div>
+    </div>
+
+    <!-- Top 10 Referrer -->
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold text-rose-600 mb-2">Top 10 Referrer</h3>
+      <ul id="top10-list" class="list-disc list-inside space-y-1 text-sm text-gray-700">
+        <li>Loading...</li>
+      </ul>
+    </div>
   </div>
-  <div class="bg-rose-50 p-3 rounded-xl">
-    <p class="text-xs text-gray-500">Tier</p>
-    <p id="batch-user" class="font-bold text-rose-700">-</p>
-  </div>
-</div>
 
-<div class="bg-yellow-100 p-4 rounded-xl mb-4">
-  <p class="text-sm text-gray-600">Jumlah Referral</p>
-  <p id="jumlah-referral" class="text-2xl font-bold text-yellow-700">0</p>
-</div>
-
-<div class="bg-green-100 p-4 rounded-xl mb-4">
-  <p class="text-sm text-gray-600">Total Jualan Referral</p>
-  <p id="total-sale" class="text-2xl font-bold text-green-700">RM0</p>
-</div>
-
-<div class="bg-indigo-100 p-4 rounded-xl mb-4">
-  <p class="text-sm text-gray-600">Total Komisen</p>
-  <p id="total-komisen" class="text-2xl font-bold text-indigo-700">RM0</p>
-</div>
-
-<h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">🏆 Top 10 Referrer</h3>
-<ul id="top10-list" class="text-sm text-gray-700 space-y-1">
-  <li>1. Memuatkan data…</li>
-</ul>
-
-<button onclick="window.location.href='beli.html'"
-  class="mt-6 w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-xl font-semibold">
-  ➕ Simulator Pembelian
-</button>
-
-<button onclick="logout()"
-  class="mt-2 w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-xl font-semibold">
-  Logout
-</button>
-
-  </div>  <script src="dashboard.js"></script></body>
+  <script src="dashboard.js"></script>
+  <script>
+    function copyLink() {
+      const link = document.getElementById("referralLink");
+      link.select();
+      link.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Link berjaya disalin!");
+    }
+  </script>
+</body>
 </html>
