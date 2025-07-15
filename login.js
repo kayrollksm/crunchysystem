@@ -1,50 +1,37 @@
+// login.js
+
 const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
 const supabaseKey = "***REMOVED***";
 
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("login-form");
-  const errorBox = document.getElementById("error-msg");
+document.getElementById('login-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-  if (!form) {
-    alert("Form login tidak dijumpai!");
+  const email = document.getElementById('email').value.trim();
+  const pendaftarId = document.getElementById('pendaftar_id').value.trim().toUpperCase();
+
+  if (!email || !pendaftarId) {
+    alert('Sila isi semua ruangan.');
     return;
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const { data, error } = await supabase
+    .from('pendaftar')
+    .select('*')
+    .eq('email', email)
+    .eq('pendaftar_id', pendaftarId)
+    .single();
 
-    const email = form.email.value.trim().toLowerCase();
-    const pendaftar_id = form.pendaftar_id.value.trim().toUpperCase();
+  if (error || !data) {
+    alert('❌ Login gagal. Sila semak email dan ID.');
+    return;
+  }
 
-    try {
-      const { data, error } = await supabase
-        .from("pendaftar")
-        .select("*")
-        .eq("email", email)
-        .eq("pendaftar_id", pendaftar_id)
-        .single();
+  // Simpan ke sessionStorage
+  sessionStorage.setItem('user', JSON.stringify(data));
+  sessionStorage.setItem('pendaftar_id', pendaftarId);
 
-      if (error || !data) {
-        errorBox.classList.remove("hidden");
-        return;
-      }
-
-      localStorage.setItem("pendaftar_id", data.pendaftar_id);
-      localStorage.setItem("email", data.email);
-      localStorage.setItem("nama", data.nama);
-      localStorage.setItem("batch", data.batch);
-
-      window.location.href = "dashboard.html";
-      
-    } catch (err) {
-      alert("❌ Ralat sistem. Sila cuba lagi.");
-      console.error("Login Error:", err);
-    }
-  });
-
-  // Auto-hide error bila user type balik
-  form.email.addEventListener("input", () => errorBox.classList.add("hidden"));
-  form.pendaftar_id.addEventListener("input", () => errorBox.classList.add("hidden"));
+  // Redirect
+  window.location.href = 'dashboard.html';
 });
