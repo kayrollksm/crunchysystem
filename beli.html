@@ -1,24 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Simulator Pembelian</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Simulator Pembelian</h2>
+<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">
 
-  <form id="beli-form">
-    <label for="pendaftar_id">ID Pendaftar:</label><br />
-    <input type="text" id="pendaftar_id" name="pendaftar_id" required /><br /><br />
+  <div class="w-full max-w-md p-6 bg-white rounded-2xl shadow-md border border-rose-200">
+    <h2 class="text-2xl font-bold text-center text-rose-600 mb-4">Simulator Pembelian</h2>
 
-    <label for="jumlah">Jumlah Pembelian (RM):</label><br />
-    <input type="number" id="jumlah" name="jumlah" required /><br /><br />
+    <form id="beli-form" class="space-y-4">
+      <input type="text" id="pendaftar_id" name="pendaftar_id" placeholder="ID Pendaftar" required
+        class="w-full px-4 py-2 border rounded-xl uppercase focus:outline-none focus:ring-2 focus:ring-rose-400" />
 
-    <button type="submit">Rekod Pembelian</button>
-  </form>
+      <input type="number" id="jumlah" name="jumlah" placeholder="Jumlah Pembelian (RM)" required min="1"
+        class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400" />
 
-  <p id="status"></p>
+      <button type="submit"
+        class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded-xl transition">
+        Rekod Pembelian
+      </button>
+    </form>
+
+    <p id="status" class="text-center text-sm text-rose-600 mt-4 whitespace-pre-line hidden"></p>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
@@ -27,38 +34,38 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxb21xbGh0a2t0a2F2YnppZmEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxMDM2Mjc2NiwiZXhwIjoyMDY5OTM4NzY2fQ.rMgptGEXD3cs93M5n7LuDAKrFSmaV27ZJlGJZ-oz3SM'
 
     const supabase = createClient(supabaseUrl, supabaseKey)
+    const form = document.getElementById("beli-form")
+    const status = document.getElementById("status")
 
-    document.getElementById("beli-form").addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault()
+      status.classList.add("hidden")
 
-      const pendaftar_id = document.getElementById("pendaftar_id").value.trim()
-      const jumlah = parseFloat(document.getElementById("jumlah").value)
+      const pendaftar_id = form.pendaftar_id.value.trim().toUpperCase()
+      const jumlah = parseFloat(form.jumlah.value.trim())
 
-      const { error } = await supabase.from("pembelian").insert([
-        {
-          pendaftar_id,
-          jumlah,
-        },
-      ])
+      const { error } = await supabase.from("pembelian").insert([{ pendaftar_id, jumlah }])
 
       if (error) {
-        document.getElementById("status").innerText = "❌ Gagal rekod pembelian: " + error.message
+        status.textContent = "❌ Gagal rekod pembelian: " + error.message
+        status.classList.remove("hidden")
         return
       }
-
-      document.getElementById("status").innerText = "✅ Berjaya rekod pembelian!"
 
       const { error: rpcError } = await supabase.rpc("update_pendaftar_info", {
         target_id: pendaftar_id
       })
 
+      let msg = "✅ Berjaya rekod pembelian!"
       if (rpcError) {
-        document.getElementById("status").innerText += "\n⚠️ RPC error: " + rpcError.message
+        msg += "\n⚠️ Gagal kemaskini info referrer: " + rpcError.message
       } else {
-        document.getElementById("status").innerText += "\n📈 Info referrer berjaya dikemaskini!"
+        msg += "\n📈 Info referrer berjaya dikemaskini!"
       }
 
-      document.getElementById("beli-form").reset()
+      status.textContent = msg
+      status.classList.remove("hidden")
+      form.reset()
     })
   </script>
 </body>
