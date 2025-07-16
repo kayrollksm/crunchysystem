@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <script src="protect-dashboard.js"></script>
+  <script type="module" src="admin-panel.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px;">
+  <h2>🛠️ Admin Panel</h2>
+  <p>Selamat datang, <strong id="admin-name"></strong>!</p>
+  <button onclick="logout()">Logout</button>
+
+  <hr/>
+
+  <h3>📋 Senarai Pengguna</h3>
+  <table border="1" cellpadding="8" cellspacing="0" style="width: 100%;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama</th>
+        <th>Role</th>
+        <th>Tukar Role</th>
+      </tr>
+    </thead>
+    <tbody id="user-table-body"></tbody>
+  </table>
+</body>
+</html>
