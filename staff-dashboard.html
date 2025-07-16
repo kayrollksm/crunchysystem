@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Dashboard</title>
+  <script type="module" src="staff-dashboard.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+  <h2>👷 Staff Dashboard</h2>
+
+  <form id="attendance-form">
+    <label>ID Pendaftar:</label><br />
+    <input type="text" id="user_id" required /><br /><br />
+
+    <label>Mode:</label><br />
+    <select id="mode" required>
+      <option value="checkin">Check In</option>
+      <option value="checkout">Check Out</option>
+    </select><br /><br />
+
+    <label>Ambil Selfie:</label><br />
+    <input type="file" id="selfie" accept="image/*" capture="user" required /><br /><br />
+
+    <button type="submit">Rekod Kehadiran</button>
+  </form>
+
+  <p id="status"></p>
+
+  <hr />
+  <h3>📋 Rekod Kehadiran Sendiri</h3>
+  <ul id="attendance-log"></ul>
+</body>
+</html>
