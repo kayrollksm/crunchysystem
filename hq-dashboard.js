@@ -1,64 +1,84 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import './logout.js'
 
-// Guna project CrunchySystem kau
-const supabaseUrl = 'https://qdy0jtztdyhvjjbdnaq.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkeTBqdHp0ZHlodmpqYmRuYXE' // ← ganti dengan anon key penuh kalau tak jalan
-
+const supabaseUrl = 'https://qdyojftztydvhyjbdnaq.supabase.co'
+const supabaseKey = '***REMOVED***'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-const form = document.getElementById("staff-form")
-const list = document.getElementById("staff-list")
-const status = document.getElementById("status")
+const form = document.getElementById('staff-form')
+const statusMsg = document.getElementById('status')
+const tableBody = document.getElementById('user-table-body')
 
-form.addEventListener("submit", async (e) => {
+// Simpan staff baru
+form.addEventListener('submit', async (e) => {
   e.preventDefault()
 
-  const name = document.getElementById("name").value
-  const ic_number = document.getElementById("ic_number").value
-  const position = document.getElementById("position").value
-  const salary = parseFloat(document.getElementById("salary").value)
-  const start_date = document.getElementById("start_date").value
+  const name = document.getElementById('name').value
+  const ic_number = document.getElementById('ic_number').value
+  const position = document.getElementById('position').value
+  const salary = parseFloat(document.getElementById('salary').value)
+  const start_date = document.getElementById('start_date').value
 
-  const { error } = await supabase.from('staff').insert([
-    { name, ic_number, position, salary, start_date }
-  ])
+  const { error } = await supabase
+    .from('staff')
+    .insert([{ name, ic_number, position, salary, start_date, role: 'staff' }])
 
   if (error) {
-    status.innerText = "❌ Gagal simpan staff"
     console.error(error)
+    statusMsg.innerText = "❌ Gagal simpan staff"
   } else {
-    status.innerText = "✅ Staff berjaya disimpan!"
+    statusMsg.innerText = "✅ Berjaya simpan staff"
     form.reset()
     loadStaff()
   }
 })
 
+// Papar senarai staff
 async function loadStaff() {
-  const { data, error } = await supabase.from('staff').select('*').order('created_at', { ascending: false })
+  const { data, error } = await supabase
+    .from('staff')
+    .select('*')
+    .order('created_at', { ascending: true })
 
-  list.innerHTML = ''
-  data.forEach(staff => {
-    const li = document.createElement("li")
-    li.innerHTML = `
-      ${staff.name} (${staff.position}) 
-      <button onclick='generateOfferLetter(${JSON.stringify(staff)})'>🎓 Offer Letter</button>
+  if (error) {
+    console.error("Gagal load staff", error)
+    return
+  }
+
+  tableBody.innerHTML = ''
+  data.forEach(user => {
+    const row = document.createElement("tr")
+    row.innerHTML = `
+      <td>${user.id}</td>
+      <td>${user.name}</td>
+      <td>${user.role}</td>
+      <td>
+        <select onchange="updateRole('${user.id}', this.value)">
+          <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>staff</option>
+          <option value="hq" ${user.role === 'hq' ? 'selected' : ''}>hq</option>
+          <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
+          <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>admin</option>
+        </select>
+      </td>
     `
-    list.appendChild(li)
+    tableBody.appendChild(row)
   })
 }
 
-window.generateOfferLetter = function(staff) {
-  let html = document.getElementById("offer-template").innerHTML
-  html = html
-    .replace("{{name}}", staff.name)
-    .replace("{{ic_number}}", staff.ic_number)
-    .replace("{{position}}", staff.position)
-    .replace("{{salary}}", staff.salary)
-    .replace("{{start_date}}", staff.start_date)
+// Tukar role staff
+window.updateRole = async function(id, newRole) {
+  const { error } = await supabase
+    .from('staff')
+    .update({ role: newRole })
+    .eq('id', id)
 
-  const el = document.createElement("div")
-  el.innerHTML = html
-  html2pdf().from(el).save(`Offer_Letter_${staff.name}.pdf`)
+  if (error) {
+    alert("❌ Gagal kemas kini role.")
+    console.error(error)
+  } else {
+    alert("✅ Role telah dikemaskini.")
+    loadStaff()
+  }
 }
 
 loadStaff()
