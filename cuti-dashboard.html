@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff - Cuti Dashboard</title>
+  <script type="module" src="cuti-dashboard.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+  <h2>📆 Dashboard Permohonan Cuti</h2>
+
+  <form id="cuti-form">
+    <label>ID Pendaftar:</label><br />
+    <input type="text" id="user_id" required /><br /><br />
+
+    <label>Jenis Cuti:</label><br />
+    <select id="jenis" required>
+      <option value="Cuti Tahunan">Cuti Tahunan</option>
+      <option value="Cuti Sakit">Cuti Sakit</option>
+      <option value="Cuti Kecemasan">Cuti Kecemasan</option>
+    </select><br /><br />
+
+    <label>Tarikh Cuti:</label><br />
+    <input type="date" id="tarikh" required /><br /><br />
+
+    <label>Sebab Cuti:</label><br />
+    <textarea id="sebab" rows="3" required></textarea><br /><br />
+
+    <button type="submit">Mohon Cuti</button>
+  </form>
+
+  <p id="status"></p>
+
+  <hr />
+  <h3>📋 Senarai Permohonan Saya</h3>
+  <ul id="cuti-log"></ul>
+</body>
+</html>
