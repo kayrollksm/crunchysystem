@@ -1,8 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import './logout.js'
 
-const supabaseUrl = 'https://qdy0jtztdyhvjjbdnaq.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkeTBqdHp0ZHlodmpqYmRuYXE'
+const supabaseUrl = 'https://qdyojftztydvhyjbdnaq.supabase.co'
+const supabaseKey = '***REMOVED***'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const tableBody = document.getElementById("user-table-body")
@@ -14,12 +14,12 @@ adminName.innerText = currentUser || "Admin"
 // Muat pengguna dari Supabase
 async function loadUsers() {
   const { data, error } = await supabase
-    .from('staff') // atau 'users' jika pakai table lain
+    .from('staff')
     .select('*')
     .order('created_at', { ascending: true })
 
   if (error) {
-    console.error("Gagal ambil data user", error)
+    console.error("❌ Gagal ambil data user", error)
     return
   }
 
@@ -46,7 +46,7 @@ async function loadUsers() {
 // Update role bila dropdown ditukar
 window.updateRole = async function(id, newRole) {
   const { error } = await supabase
-    .from('staff') // atau 'users'
+    .from('staff')
     .update({ role: newRole })
     .eq('id', id)
 
