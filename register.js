@@ -1,66 +1,33 @@
-const form = document.getElementById("registerForm");
-
-const params = new URLSearchParams(window.location.search);
-const refCode = params.get("ref");
-if (refCode) {
-  document.getElementById("referral").value = refCode.toUpperCase();
-}
-
-function getNextBatch(referralCode) {
-  if (!referralCode) return "A";
-  const lastChar = referralCode.slice(-1).toUpperCase();
-  if (/^[A-Z]$/.test(lastChar)) {
-    return String.fromCharCode(lastChar.charCodeAt(0) + 1);
-  } else if (/^[A-Z]{2}$/.test(lastChar)) {
-    return "AA";
-  } else {
-    return "A";
-  }
-}
-
-function generateRandomNumber(length = 5) {
-  const max = Math.pow(10, length);
-  return Math.floor(Math.random() * max).toString().padStart(length, "0");
-}
+const form = document.getElementById("register-form");
+const statusMsg = document.getElementById("status-msg");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nama = form.nama.value.trim();
-  const telefon = form.telefon.value.trim();
-  const email = form.email.value.trim();
-  const referral = form.referral.value.trim().toUpperCase();
+  const nama = form.nama.value;
+  const telefon = form.telefon.value;
+  const email = form.email.value;
+  const kod_referral = form.kod_referral.value;
 
-  const batch = getNextBatch(referral);
-  const randomNo = generateRandomNumber();
-  const pendaftar_id = `MC${randomNo}${batch}`;
+  try {
+    const response = await fetch("https://delicate-chaja-e44d0e1.netlify.app/.netlify/functions/pendaftar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ nama, telefon, email, kod_referral }),
+    });
 
-  const dataToSend = {
-    nama,
-    telefon,
-    email,
-    referral,
-    pendaftar_id,
-    batch
-  };
+    const data = await response.json();
 
-  const res = await fetch("https://crunchy-api.vercel.app/api/pendaftar", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(dataToSend)
-  });
-
-  const result = await res.json();
-
-  if (result.error) {
-    alert("❌ Pendaftaran gagal: " + result.error);
-  } else {
-    localStorage.setItem("pendaftar_id", pendaftar_id);
-    localStorage.setItem("email", email);
-    localStorage.setItem("nama", nama);
-    localStorage.setItem("batch", batch);
-    window.location.href = "thank.html";
+    if (data.success) {
+      statusMsg.textContent = "✅ Pendaftaran berjaya!";
+      form.reset();
+    } else {
+      statusMsg.textContent = "❌ Pendaftaran gagal. Sila cuba lagi.";
+    }
+  } catch (error) {
+    console.error("Ralat:", error);
+    statusMsg.textContent = "⚠️ Ralat sistem. Sila cuba sebentar lagi.";
   }
 });
