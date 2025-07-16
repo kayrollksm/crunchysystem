@@ -1,6 +1,5 @@
 const form = document.getElementById("registerForm");
 
-// 🎯 Prefill kod referral dari URL
 const params = new URLSearchParams(window.location.search);
 const refCode = params.get("ref");
 if (refCode) {
@@ -37,28 +36,26 @@ form.addEventListener("submit", async (e) => {
   const pendaftar_id = `MC${randomNo}${batch}`;
 
   const dataToSend = {
-    endpoint: "pendaftar",
-    method: "POST",
-    data: {
-      nama,
-      telefon,
-      email,
-      referral,
-      pendaftar_id,
-      batch
-    }
+    nama,
+    telefon,
+    email,
+    referral,
+    pendaftar_id,
+    batch
   };
 
-  const response = await fetch("https://script.google.com/macros/s/AKfycbzxPzIv82xlP0W3PLrtv4Xa9HNquD7A81sZn7-eYklzW1fflMndPzDIlVxP58_lQS9qQg/exec", {
+  const res = await fetch("https://crunchy-api.vercel.app/api/pendaftar", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify(dataToSend)
   });
 
-  const result = await response.json();
+  const result = await res.json();
 
   if (result.error) {
-    alert("❌ Pendaftaran gagal: " + result.error.message);
+    alert("❌ Pendaftaran gagal: " + result.error);
   } else {
     localStorage.setItem("pendaftar_id", pendaftar_id);
     localStorage.setItem("email", email);
