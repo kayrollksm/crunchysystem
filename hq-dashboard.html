@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HQ Dashboard - Staff Management</title>
+  <script type="module" src="hq-dashboard.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+  <h2>🧑‍💼 HQ Dashboard</h2>
+
+  <section>
+    <h3>➕ Tambah Staff Baru</h3>
+    <form id="staff-form">
+      <label>Nama:</label><br/>
+      <input type="text" id="name" required/><br/><br/>
+
+      <label>No KP:</label><br/>
+      <input type="text" id="ic_number" required/><br/><br/>
+
+      <label>Jawatan:</label><br/>
+      <input type="text" id="position" required/><br/><br/>
+
+      <label>Gaji (RM):</label><br/>
+      <input type="number" id="salary" required/><br/><br/>
+
+      <label>Tarikh Mula:</label><br/>
+      <input type="date" id="start_date" required/><br/><br/>
+
+      <button type="submit">Simpan Staff</button>
+    </form>
+    <p id="status"></p>
+  </section>
+
+  <hr/>
+
+  <section>
+    <h3>📋 Senarai Staff</h3>
+    <ul id="staff-list"></ul>
+  </section>
+
+  <!-- Template Surat Tawaran (Hidden) -->
+  <template id="offer-template">
+    <h2>Surat Tawaran Kerja</h2>
+    <p>Kepada: <strong>{{name}}</strong></p>
+    <p>No KP: {{ic_number}}</p>
+    <p>
+      Dengan sukacitanya kami menawarkan anda jawatan sebagai <strong>{{position}}</strong>
+      dengan gaji bulanan sebanyak <strong>RM{{salary}}</strong>.
+      Anda dijadualkan untuk memulakan kerja pada <strong>{{start_date}}</strong>.
+    </p>
+    <p>Sila sahkan penerimaan surat tawaran ini dalam masa 3 hari bekerja.</p>
+    <br><br>
+    <p>Yang benar,</p>
+    <p><strong>PENGURUS SYARIKAT</strong></p>
+  </template>
+</body>
+</html>
