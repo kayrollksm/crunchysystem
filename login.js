@@ -1,37 +1,48 @@
-// login.js
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-const supabaseUrl = "https://qdyojftztydvhyjbdnaq.supabase.co";
-const supabaseKey = "***REMOVED***";
+const supabaseUrl = 'https://qdy0jtztdyhvjjbdnaq.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkeTBqdHp0ZHlodmpqYmRuYXE'
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const form = document.getElementById("login-form")
+const statusMsg = document.getElementById("status")
 
-document.getElementById('login-form').addEventListener('submit', async function (e) {
-  e.preventDefault();
+form.addEventListener("submit", async function (e) {
+  e.preventDefault()
 
-  const email = document.getElementById('email').value.trim();
-  const pendaftarId = document.getElementById('pendaftar_id').value.trim().toUpperCase();
-
-  if (!email || !pendaftarId) {
-    alert('Sila isi semua ruangan.');
-    return;
-  }
+  const user_id = document.getElementById("user_id").value.trim()
 
   const { data, error } = await supabase
-    .from('pendaftar')
+    .from('staff') // tukar ke 'users' kalau pakai table lain
     .select('*')
-    .eq('email', email)
-    .eq('pendaftar_id', pendaftarId)
-    .single();
+    .eq('id', user_id)
+    .single()
 
   if (error || !data) {
-    alert('❌ Login gagal. Sila semak email dan ID.');
-    return;
+    statusMsg.innerText = "❌ ID tidak dijumpai."
+    return
   }
 
-  // Simpan ke sessionStorage
-  sessionStorage.setItem('user', JSON.stringify(data));
-  sessionStorage.setItem('pendaftar_id', pendaftarId);
+  // Simpan dalam localStorage
+  localStorage.setItem("user_id", data.id)
+  localStorage.setItem("role", data.role)
+  localStorage.setItem("name", data.name)
 
-  // Redirect
-  window.location.href = 'dashboard.html';
-});
+  // Redirect ikut role
+  switch (data.role) {
+    case 'hq':
+      window.location.href = 'hq-dashboard.html'
+      break
+    case 'staff':
+      window.location.href = 'staff-dashboard.html'
+      break
+    case 'admin':
+      window.location.href = 'admin-panel.html'
+      break
+    case 'user':
+      window.location.href = 'user-dashboard.html'
+      break
+    default:
+      statusMsg.innerText = "❌ Role tidak dikenalpasti."
+  }
+})
