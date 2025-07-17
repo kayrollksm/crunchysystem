@@ -12,7 +12,6 @@ export default async function handler(req, res) {
 
   try {
     const data = req.body
-
     const { error } = await supabase
       .from('pendaftar')
       .insert([data])
@@ -21,8 +20,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message })
     }
 
-    return res.status(200).json({ message: 'Pendaftaran berjaya!' })
+    res.status(200).json({ message: 'Pendaftaran berjaya!' })
   } catch (e) {
-    return res.status(500).json({ error: 'Server error', detail: e.message })
+    res.status(500).json({ error: 'Server error', detail: e.message })
   }
 }
