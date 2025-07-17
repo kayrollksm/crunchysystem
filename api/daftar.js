@@ -9,30 +9,59 @@ const supabase = createClient(
 )
 
 router.post("/", async (req, res) => {
-  const { nama, email, no_telefon, referral } = req.body
-
-  if (!nama || !email || !no_telefon) {
-    return res.status(400).json({ error: "Sila isi semua maklumat wajib." })
-  }
-
   try {
-    const { data: insertedData, error } = await supabase
-      .from("pendaftar")
-      .insert([{ nama, email, no_telefon, referral }])
-      .select() // ambil data yg dimasukkan
+    const { nama, email, no_telefon, referral } = req.body
 
-    if (error) {
-      console.error("Supabase error:", error)
-      return res.status(500).json({ error: "Gagal mendaftar." })
+    if (!nama || !email || !no_telefon || !referral) {
+      return res.status(400).json({ error: "Semua field diperlukan" })
     }
+
+    // Semak referral ID wujud
+    const { data: referrer, error: referrerError } = await supabase
+      .from("pendaftar")
+      .select("id, referral_count, jumlah_referral")
+      .eq("pendaftar_id", referral)
+      .single()
+
+    if (referrerError || !referrer) {
+      return res.status(400).json({ error: "Referral ID tidak sah" })
+    }
+
+    // Generate ID Pendaftar Baru
+    const newId = crypto.randomUUID().slice(0, 8).toUpperCase()
+    const pendaftar_id = `MC${newId}B` // contoh: MCXXXXXXB
+
+    // Masukkan ke table pendaftar
+    const { error: insertError } = await supabase.from("pendaftar").insert([
+      {
+        nama,
+        email,
+        no_telefon,
+        pendaftar_id,
+        referral,
+      },
+    ])
+
+    if (insertError) throw insertError
+
+    // Kira semula jumlah referral
+    const { error: updateError } = await supabase
+      .from("pendaftar")
+      .update({
+        referral_count: (referrer.referral_count || 0) + 1,
+        jumlah_referral: (referrer.jumlah_referral || 0) + 1,
+      })
+      .eq("id", referrer.id)
+
+    if (updateError) throw updateError
 
     res.status(200).json({
       message: "Pendaftaran berjaya!",
-      data: insertedData[0] // return data yg didaftar
+      data: { pendaftar_id },
     })
   } catch (err) {
-    console.error("Server error:", err)
-    res.status(500).json({ error: "Ralat server." })
+    console.error(err)
+    res.status(500).json({ error: "Ralat server!" })
   }
 })
 
