@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import './logout.js'
 
 const supabaseUrl = 'https://qdyojftztydvhyjbdnaq.supabase.co'
-const supabaseKey = '***REMOVED***'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkeW9qZnR6dHlkdmh5amJkbmFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNjM3MjksImV4cCI6MjA2NzczOTcyOX0.dGPJ3tcv3hcxZHqzDzNJh2l682ykxxK0D3bat_FzvhQ'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const form = document.getElementById('staff-form')
