@@ -7,11 +7,11 @@
 <body>
   <h2>Borang Pendaftaran</h2>
   <form id="form-daftar">
-    <label>Nama:</label><br>
-    <input type="text" id="nama" required /><br><br>
+    <label>Nama:</label><br />
+    <input type="text" id="nama" required /><br /><br />
 
-    <label>Email:</label><br>
-    <input type="email" id="email" required /><br><br>
+    <label>Email:</label><br />
+    <input type="email" id="email" required /><br /><br />
 
     <button type="submit">Hantar</button>
   </form>
@@ -20,20 +20,26 @@
 
   <script>
     document.getElementById("form-daftar").addEventListener("submit", async function (e) {
-      e.preventDefault()
+      e.preventDefault();
 
-      const nama = document.getElementById("nama").value
-      const email = document.getElementById("email").value
+      const nama = document.getElementById("nama").value;
+      const email = document.getElementById("email").value;
 
-      const response = await fetch("/api/daftar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nama, email })
-      })
+      try {
+        const response = await fetch("https://crunchysystem.vercel.app/api/daftar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nama, email }),
+        });
 
-      const result = await response.json()
-      document.getElementById("status").innerText = result.message || result.error
-    })
+        const result = await response.json();
+        document.getElementById("status").innerText =
+          result.message || result.error;
+      } catch (error) {
+        document.getElementById("status").innerText =
+          "Ralat sambungan: " + error.message;
+      }
+    });
   </script>
 </body>
 </html>
