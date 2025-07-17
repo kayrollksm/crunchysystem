@@ -1,43 +1,39 @@
-import express from 'express'
-import { createClient } from '@supabase/supabase-js'
+import express from "express"
+import { createClient } from "@supabase/supabase-js"
 
-const app = express()
-const PORT = process.env.PORT || 3000
+const router = express.Router()
 
-// Supabase credentials dari environment Render
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing.')
-}
+router.post("/", async (req, res) => {
+  const { nama, email, no_telefon, referral } = req.body
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-app.use(express.json())
-
-app.post('/api/daftar', async (req, res) => {
-  const { nama, email, phone, referral } = req.body
-
-  if (!nama || !email || !phone) {
-    return res.status(400).json({ error: 'Sila isi semua maklumat wajib.' })
+  if (!nama || !email || !no_telefon) {
+    return res.status(400).json({ error: "Sila isi semua maklumat wajib." })
   }
 
   try {
-    const { data, error } = await supabase
-      .from('pendaftar')
-      .insert([{ nama, email, phone, referral }])
+    const { data: insertedData, error } = await supabase
+      .from("pendaftar")
+      .insert([{ nama, email, no_telefon, referral }])
+      .select() // ambil data yg dimasukkan
 
     if (error) {
-      throw error
+      console.error("Supabase error:", error)
+      return res.status(500).json({ error: "Gagal mendaftar." })
     }
 
-    res.status(200).json({ message: 'Pendaftaran berjaya!', data })
+    res.status(200).json({
+      message: "Pendaftaran berjaya!",
+      data: insertedData[0] // return data yg didaftar
+    })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error("Server error:", err)
+    res.status(500).json({ error: "Ralat server." })
   }
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+export default router
