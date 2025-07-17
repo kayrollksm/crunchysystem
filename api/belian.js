@@ -1,20 +1,31 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
-  'https://qdyojftztydvhyjbdnaq.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+    return res.status(405).json({ message: 'Invalid method' })
   }
 
-  const data = req.body
+  const { pendaftar_id, jumlah } = req.body
 
-  const { error } = await supabase.from('pembelian').insert([data])
+  if (!pendaftar_id || !jumlah) {
+    return res.status(400).json({ message: 'Missing data' })
+  }
 
-  if (error) return res.status(400).json({ error: error.message })
+  const { data, error } = await supabase.from('pembelian').insert([
+    {
+      pendaftar_id,
+      jumlah,
+    },
+  ])
 
-  res.status(200).json({ message: 'Pembelian berjaya direkod!' })
+  if (error) {
+    return res.status(500).json({ message: 'Failed to insert', error })
+  }
+
+  res.status(200).json({ message: 'Success', data })
 }
