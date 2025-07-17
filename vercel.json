@@ -1,8 +1,5 @@
 {
-  "version": 2,
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "rewrites": [
+    { "source": "/register", "destination": "/register.html" }
+  ]
 }
