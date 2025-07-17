@@ -1,0 +1,8 @@
+{
+  "name": "crunchy-api",
+  "version": "1.0.0",
+  "main": "daftar.js",
+  "scripts": {
+    "start": "node daftar.js"
+  }
+}
