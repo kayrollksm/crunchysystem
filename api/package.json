@@ -1,8 +1,12 @@
 {
   "name": "crunchy-api",
   "version": "1.0.0",
+  "type": "module",
   "main": "daftar.js",
   "scripts": {
     "start": "node daftar.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.5"
   }
 }
