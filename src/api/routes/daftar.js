@@ -1,5 +1,6 @@
 import express from "express"
 import { createClient } from "@supabase/supabase-js"
+import crypto from "crypto" // ← WAJIB
 
 const router = express.Router()
 
@@ -29,7 +30,7 @@ router.post("/", async (req, res) => {
 
     // Generate ID Pendaftar Baru
     const newId = crypto.randomUUID().slice(0, 8).toUpperCase()
-    const pendaftar_id = `MC${newId}B` // contoh: MCXXXXXXB
+    const pendaftar_id = `MC${newId}B`
 
     // Masukkan ke table pendaftar
     const { error: insertError } = await supabase.from("pendaftar").insert([
@@ -44,7 +45,7 @@ router.post("/", async (req, res) => {
 
     if (insertError) throw insertError
 
-    // Kira semula jumlah referral
+    // Update referral stats
     const { error: updateError } = await supabase
       .from("pendaftar")
       .update({
