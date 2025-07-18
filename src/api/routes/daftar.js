@@ -1,6 +1,6 @@
 import express from "express"
 import { createClient } from "@supabase/supabase-js"
-import crypto from "crypto" // ← WAJIB
+import crypto from "crypto"
 
 const router = express.Router()
 
@@ -11,8 +11,17 @@ const supabase = createClient(
 
 router.post("/", async (req, res) => {
   try {
-    const { nama, email, no_telefon, referral } = req.body
+    const {
+      nama,
+      email,
+      no_telefon,
+      referral,
+      jawatan,
+      gaji,
+      tarikh_mula
+    } = req.body
 
+    // Semakan field wajib
     if (!nama || !email || !no_telefon || !referral) {
       return res.status(400).json({ error: "Semua field diperlukan" })
     }
@@ -30,22 +39,26 @@ router.post("/", async (req, res) => {
 
     // Generate ID Pendaftar Baru
     const newId = crypto.randomUUID().slice(0, 8).toUpperCase()
-    const pendaftar_id = `MC${newId}B`
+    const pendaftar_id = `MC${newId}B` // contoh: MCXXXXXXB
 
-    // Masukkan ke table pendaftar
+    // Masukkan data ke table pendaftar
     const { error: insertError } = await supabase.from("pendaftar").insert([
       {
         nama,
         email,
         no_telefon,
+        jawatan,
+        gaji,
+        tarikh_mula,
         pendaftar_id,
         referral,
+        status: "Belum Disahkan"
       },
     ])
 
     if (insertError) throw insertError
 
-    // Update referral stats
+    // Update referral count
     const { error: updateError } = await supabase
       .from("pendaftar")
       .update({
