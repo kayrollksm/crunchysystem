@@ -6,14 +6,18 @@ import getSurat from "./routes/get-surat.js"
 
 const app = express()
 
-// ✅ Stable CORS for GitHub Pages
-app.use(cors({
+// CORS setup
+const corsOptions = {
   origin: "https://kayrollksm.github.io",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
-}))
+}
+app.use(cors(corsOptions))
 
-// JSON parser
+// ✅ Handle preflight OPTIONS secara global
+app.options("*", cors(corsOptions))
+
+// Body parser
 app.use(express.json())
 
 // Routes
