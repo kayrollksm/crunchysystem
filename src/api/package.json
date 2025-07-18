@@ -1,12 +1,15 @@
 {
+  "name": "crunchysystem-api",
+  "version": "1.0.0",
+  "description": "API untuk CrunchySystem HR",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/api/index.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "@supabase/supabase-js": "^2.39.7",
     "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.39.5"
   }
 }

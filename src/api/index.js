@@ -1,11 +1,11 @@
 import express from "express"
-import daftarCalon from "./routes/daftar.js" // ✅ maintain import ini
+import daftarCalon from "./routes/daftar.js"
 import getCalon from "./routes/get-calon.js"
 import getSurat from "./routes/get-surat.js"
 
 const app = express()
 
-// ✅ Manual CORS Middleware
+// Middleware untuk CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 
 app.use(express.json())
 
-// ✅ Update route
+// Route
 app.post("/api/daftar", daftarCalon)
 app.get("/api/get-calon", getCalon)
 app.get("/api/get-surat", getSurat)
