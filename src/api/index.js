@@ -1,5 +1,5 @@
 import express from "express"
-import daftarCalon from "./routes/daftar-calon.js"
+import daftarCalon from "./routes/daftar.js"
 import getCalon from "./routes/get-calon.js"
 import getSurat from "./routes/get-surat.js"
 
