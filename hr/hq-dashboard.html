@@ -1,110 +1,112 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HQ Dashboard - HR</title>
-  <link rel="stylesheet" href="/css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #fff7f0;
-      padding: 2rem;
-    }
-    .card {
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    }
-    input, select, button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
-      border-radius: 0.5rem;
-      border: 1px solid #ddd;
-      font-size: 1rem;
-    }
-    button {
-      background: #FF5B00;
-      color: white;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
-    table {
-      margin-top: 3rem;
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 0.75rem;
-      border-bottom: 1px solid #ccc;
-      text-align: left;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HR Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
-<body>
+<body class="bg-orange-50 font-[Inter] text-sm text-[#422814]">
 
-  <div class="card">
-    <h2>Tambah Calon Pekerja</h2>
-    <form id="form-calon">
-      <label>Nama:</label>
-      <input type="text" id="nama" required />
+  <div class="max-w-xl mx-auto py-10 px-5">
+    <h2 class="text-center text-2xl font-bold mb-8">HR DASHBOARD</h2>
 
-      <label>No. Telefon:</label>
-      <input type="text" id="telefon" required />
+    <!-- FORM TAMBAH CALON -->
+    <form id="calon-form" class="bg-white rounded-xl p-6 shadow space-y-4">
+      <h3 class="text-lg font-semibold mb-2">Tambah Calon Pekerja</h3>
 
-      <label>Jawatan:</label>
-      <input type="text" id="jawatan" required />
+      <input type="text" id="nama" placeholder="Nama" class="input" required />
+      <input type="text" id="telefon" placeholder="No. Telefon" class="input" required />
+      <input type="text" id="jawatan" placeholder="Jawatan" class="input" required />
+      <input type="number" id="gaji" placeholder="Gaji (RM)" class="input" required />
+      <input type="date" id="tarikh_mula" class="input" required />
 
-      <label>Gaji (RM):</label>
-      <input type="number" id="gaji" required />
-
-      <label>Tarikh Mula:</label>
-      <input type="date" id="tarikh_mula" required />
-
-      <button type="submit">Hantar & WhatsApp</button>
+      <button type="submit" class="bg-[#FF5B00] text-white py-2 px-4 rounded font-semibold w-full">
+        Hantar & WhatsApp
+      </button>
     </form>
+
+    <!-- SENARAI CALON -->
+    <div class="mt-10 bg-white rounded-xl p-6 shadow">
+      <h3 class="text-lg font-semibold mb-4">Senarai Calon Pekerja</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b">
+              <th class="py-2">Nama</th>
+              <th>No. Telefon</th>
+              <th>Jawatan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="calon-list" class="text-sm"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script>
-    const form = document.getElementById("form-calon");
+    const form = document.getElementById('calon-form');
+    const list = document.getElementById('calon-list');
 
-    form.addEventListener("submit", async (e) => {
+    const API_BASE = 'https://crunchysystem-api.onrender.com/api';
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const nama = document.getElementById("nama").value.trim();
-      const telefon = document.getElementById("telefon").value.trim();
-      const jawatan = document.getElementById("jawatan").value.trim();
-      const gaji = document.getElementById("gaji").value.trim();
-      const tarikh_mula = document.getElementById("tarikh_mula").value;
+      const nama = document.getElementById('nama').value;
+      const telefon = document.getElementById('telefon').value;
+      const jawatan = document.getElementById('jawatan').value;
+      const gaji = document.getElementById('gaji').value;
+      const tarikh_mula = document.getElementById('tarikh_mula').value;
 
-      const res = await fetch("https://crunchysystem.vercel.app/api/daftar-calon", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+      const res = await fetch(`${API_BASE}/daftar-calon`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nama, telefon, jawatan, gaji, tarikh_mula })
       });
 
-      const result = await res.json();
+      const data = await res.json();
 
       if (res.ok) {
-        const msg = `Assalamualaikum ${nama}, Tahniah! Kami dari Mouthgasm Crunchy ingin melantik anda untuk jawatan ${jawatan}. Sila lengkapkan borang Pengambilan Pekerja berikut: https://kayrollksm.github.io/crunchysystem/hr/form.html`;
-
-        const whatsappLink = `https://wa.me/6${telefon}?text=${encodeURIComponent(msg)}`;
-        window.open(whatsappLink, "_blank");
-
-        alert("Calon berjaya ditambah & WhatsApp dibuka");
+        alert("Berjaya daftar calon!");
+        window.open(`https://wa.me/6${telefon}?text=Assalamualaikum ${nama}, Tahniah! Kami dari Mouthgasm Crunchy ingin melantik anda untuk jawatan ${jawatan}. Sila lengkapkan borang Pengambilan Pekerja: https://yourformlink.com`, '_blank');
         form.reset();
+        fetchCalon();
       } else {
-        alert("Ralat: " + result.error);
-        console.error(result.error);
+        alert("Gagal daftar calon: " + (data.error || "Ralat tidak diketahui"));
       }
     });
+
+    async function fetchCalon() {
+      const res = await fetch(`${API_BASE}/get-calon`);
+      const data = await res.json();
+
+      list.innerHTML = '';
+      data.forEach(calon => {
+        list.innerHTML += `
+          <tr class="border-b">
+            <td class="py-2">${calon.nama}</td>
+            <td>${calon.telefon}</td>
+            <td>${calon.jawatan}</td>
+            <td>${calon.status}</td>
+          </tr>
+        `;
+      });
+    }
+
+    fetchCalon();
   </script>
+
+  <style>
+    .input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+  </style>
 </body>
 </html>
