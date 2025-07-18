@@ -1,6 +1,5 @@
 import express from "express"
 import { createClient } from "@supabase/supabase-js"
-import crypto from "crypto"
 
 const router = express.Router()
 
@@ -10,73 +9,30 @@ const supabase = createClient(
 )
 
 router.post("/", async (req, res) => {
-  try {
-    const {
+  const { nama, no_telefon, jawatan, gaji, tarikh_mula, email, referral } = req.body
+
+  if (!nama || !no_telefon || !jawatan || !gaji || !tarikh_mula || !email || !referral) {
+    return res.status(400).json({ error: "Maklumat tidak lengkap" })
+  }
+
+  const { data, error } = await supabase
+    .from("calon_pekerja")
+    .insert([{
       nama,
-      email,
       no_telefon,
-      referral,
       jawatan,
       gaji,
-      tarikh_mula
-    } = req.body
+      tarikh_mula,
+      email,
+      referral,
+      status: "Belum Disahkan"
+    }])
+    .select()
+    .single()
 
-    // Validasi input
-    if (!nama || !email || !no_telefon || !referral) {
-      return res.status(400).json({ error: "Semua field diperlukan" })
-    }
+  if (error) return res.status(500).json({ error: error.message })
 
-    // Semak referral ID wujud
-    const { data: referrer, error: referrerError } = await supabase
-      .from("pendaftar")
-      .select("id, referral_count, jumlah_referral")
-      .eq("pendaftar_id", referral)
-      .single()
-
-    if (referrerError || !referrer) {
-      return res.status(400).json({ error: "Referral ID tidak sah" })
-    }
-
-    // Generate ID Pendaftar baru
-    const newId = crypto.randomUUID().slice(0, 8).toUpperCase()
-    const pendaftar_id = `MC${newId}B` // Contoh: MC8A12D9B
-
-    // Masukkan ke table pendaftar
-    const { error: insertError } = await supabase.from("pendaftar").insert([
-      {
-        nama,
-        email,
-        no_telefon,
-        jawatan,
-        gaji,
-        tarikh_mula,
-        pendaftar_id,
-        referral,
-        status: "Belum Disahkan"
-      }
-    ])
-
-    if (insertError) throw insertError
-
-    // Update referral count
-    const { error: updateError } = await supabase
-      .from("pendaftar")
-      .update({
-        referral_count: (referrer.referral_count || 0) + 1,
-        jumlah_referral: (referrer.jumlah_referral || 0) + 1
-      })
-      .eq("id", referrer.id)
-
-    if (updateError) throw updateError
-
-    res.status(200).json({
-      message: "Pendaftaran berjaya!",
-      data: { pendaftar_id }
-    })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: "Ralat server!" })
-  }
+  res.status(200).json({ message: "Calon berjaya didaftarkan", data })
 })
 
 export default router
