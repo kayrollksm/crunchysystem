@@ -3,30 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redirecting...</title>
-  <meta http-equiv="refresh" content="5; url=register.html" />
+  <title>Welcome | Mouthgasm Crunchy System</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 40px;
-      background: #fff0f3;
-      color: #a70027;
+    .link-box {
+      display: block;
+      padding: 1rem;
+      background-color: var(--brand-white);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--brand-mocha);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transition: background-color 0.2s;
+    }
+
+    .link-box:hover {
+      background-color: var(--brand-caramel);
+      color: white;
     }
   </style>
 </head>
 <body>
-  <h2>Sedang mengalihkan ke halaman pendaftaran...</h2>
-  <p>Jika tidak dialihkan dalam beberapa saat, klik <a href="register.html">di sini</a>.</p>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get("ref");
-    const target = ref ? `register.html?ref=${ref}` : "register.html";
+  <div style="max-width: 600px; margin: 3rem auto; padding: 1rem;">
+    <h1 class="dashboard-title" style="text-align: center;">Sistem Mouthgasm Crunchy</h1>
 
-    setTimeout(() => {
-      window.location.href = target;
-    }, 100);
-  </script>
+    <a href="hr/hq-dashboard.html" class="link-box">👥 HR Department</a>
+    <a href="marketing/marketing-dashboard.html" class="link-box">📢 Marketing Department</a>
+    <a href="sales/sales-dashboard.html" class="link-box">💰 Sales Department</a>
+    <a href="account/account-dashboard.html" class="link-box">📊 Account Department</a>
+    <a href="production/production-dashboard.html" class="link-box">🏭 Production Department</a>
+  </div>
+
 </body>
 </html>

@@ -3,32 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - CrunchySystem</title>
-  <meta name="description" content="Log masuk ke sistem referral CrunchySystem untuk lihat prestasi dan jumlah referral anda." />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Login | Mouthgasm Crunchy</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .login-box {
+      max-width: 400px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    }
+    select, input {
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-rose-100 to-amber-50 min-h-screen flex items-center justify-center">
+<body>
 
-  <div class="w-full max-w-sm p-6 bg-white rounded-2xl shadow-lg border border-rose-200">
-    <h2 class="text-2xl font-bold text-center text-rose-600 mb-4">Login CrunchySystem</h2>
+  <div class="login-box">
+    <h1 class="dashboard-title" style="text-align:center;">Log Masuk Palsu</h1>
 
-    <form id="login-form" class="space-y-4">
-      <input type="email" id="email" name="email" placeholder="Email" required autofocus
-        class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400" />
-      
-      <input type="text" id="pendaftar_id" name="pendaftar_id" placeholder="ID Pendaftar" required
-        class="w-full px-4 py-2 border rounded-xl uppercase focus:outline-none focus:ring-2 focus:ring-rose-400" />
+    <form id="fakeLoginForm">
+      <label>Nama:</label>
+      <input type="text" id="nama" required />
 
-      <div id="error-msg" class="text-rose-600 text-sm hidden">Login gagal. Sila semak semula.</div>
+      <label>Pilih Role:</label>
+      <select id="role" required>
+        <option value="">-- Pilih --</option>
+        <option value="hr">HR</option>
+        <option value="marketing">Marketing</option>
+        <option value="sales">Sales</option>
+        <option value="account">Account</option>
+        <option value="production">Production</option>
+      </select>
 
-      <button type="submit"
-        class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded-xl transition">
-        Log Masuk
-      </button>
+      <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="login.js"></script>
+  <script>
+    document.getElementById("fakeLoginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const role = document.getElementById("role").value;
+      if (role === "hr") location.href = "hr/hq-dashboard.html";
+      if (role === "marketing") location.href = "marketing/marketing-dashboard.html";
+      if (role === "sales") location.href = "sales/sales-dashboard.html";
+      if (role === "account") location.href = "account/account-dashboard.html";
+      if (role === "production") location.href = "production/production-dashboard.html";
+    });
+  </script>
+
 </body>
 </html>

@@ -1,0 +1,76 @@
+<!-- hr/surat.html (versi tanpa anon key, guna API protected) -->
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surat Tawaran</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .surat {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .surat h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .btn-print {
+      margin-top: 2rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="surat" id="surat">
+    <h2>SURAT TAWARAN PEKERJAAN</h2>
+
+    <p>Tarikh: <span id="tarikh"></span></p>
+
+    <p>Kepada,<br>
+    <strong id="nama"></strong><br>
+    No. Kad Pengenalan: <span id="ic"></span></p>
+
+    <p>Tuan/Puan,</p>
+
+    <p>Dengan sukacitanya kami menawarkan anda jawatan sebagai <strong id="jawatan"></strong> di Mouthgasm Crunchy bermula pada <strong id="tarikhMula"></strong>. Gaji permulaan anda ialah sebanyak <strong id="gaji"></strong> sebulan.</p>
+
+    <p>Anda dikehendaki melaporkan diri di HQ kami pada tarikh yang dinyatakan. Sila bawa salinan kad pengenalan dan dokumen sokongan semasa hadir.</p>
+
+    <p>Sekian, terima kasih.</p>
+
+    <p>Yang menjalankan tugas,<br><br><strong>Pengurus Sumber Manusia</strong><br>Mouthgasm Crunchy</p>
+  </div>
+
+  <div class="btn-print">
+    <button onclick="window.print()" class="btn-primary">Muat Turun / Cetak PDF</button>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search)
+    const calonId = urlParams.get('id')
+
+    async function loadCalon() {
+      const res = await fetch(`/api/get-surat.js?id=${calonId}`)
+      const data = await res.json()
+
+      document.getElementById('nama').innerText = data.nama
+      document.getElementById('ic').innerText = data.ic
+      document.getElementById('jawatan').innerText = data.jawatan || '-'
+      document.getElementById('gaji').innerText = `RM ${data.gaji || '-'}`
+      document.getElementById('tarikhMula').innerText = data.tarikh_mula || '-'
+      document.getElementById('tarikh').innerText = new Date().toLocaleDateString('ms-MY')
+    }
+
+    loadCalon()
+  </script>
+
+</body>
+</html>

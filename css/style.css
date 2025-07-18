@@ -1,14 +1,12 @@
-/* Import Google Font Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+/* Import Google Font Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-/* Global body style */
 body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #F5F5F5; /* Putih tulang */
-  color: #422814; /* Mocha gelap */
-  margin: 0;
-  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #F5F5F5;
+  color: #422814;
 }
+
 
 /* Warna brand utama */
 :root {
