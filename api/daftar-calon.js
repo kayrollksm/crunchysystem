@@ -1,12 +1,14 @@
-// /api/daftar-calon.js
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SECRET_KEY
-)
-
 export default async function handler(req, res) {
+  // Tambah CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') return res.status(405).end()
 
   const { nama, telefon, jawatan, gaji, tarikh_mula } = req.body
