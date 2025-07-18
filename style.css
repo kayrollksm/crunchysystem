@@ -1,1 +1,69 @@
+/* Import Google Font Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
+/* Global body style */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #F5F5F5; /* Putih tulang */
+  color: #422814; /* Mocha gelap */
+  margin: 0;
+  padding: 0;
+}
+
+/* Warna brand utama */
+:root {
+  --brand-red: #F12B11;
+  --brand-orange: #FF5B00;
+  --brand-caramel: #FFA600;
+  --brand-mocha: #422814;
+  --brand-danger: #7B0000;
+  --brand-white: #FFFFFF;
+  --brand-black: #000000;
+}
+
+/* Butang utama */
+.btn-primary {
+  background-color: var(--brand-red);
+  color: white;
+  font-weight: bold;
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-orange);
+}
+
+/* Tajuk dalam dashboard */
+.dashboard-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--brand-mocha);
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+/* Card box */
+.card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+}
+
+/* Input */
+input, select {
+  font-family: 'Poppins', sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
