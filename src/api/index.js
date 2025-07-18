@@ -8,8 +8,8 @@ const app = express()
 
 // ✅ ENABLE CORS - paling penting baris ni
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"],
+  origin: ["https://kayrollksm.github.io"],
+  methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }))
 
