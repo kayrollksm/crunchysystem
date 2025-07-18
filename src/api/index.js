@@ -1,22 +1,19 @@
 import express from "express"
+import cors from "cors"
 import daftarCalon from "./routes/daftar.js"
 import getCalon from "./routes/get-calon.js"
 import getSurat from "./routes/get-surat.js"
 
 const app = express()
 
-// ✅ CORS FIX DULU
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*")
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-  res.header("Access-Control-Allow-Headers", "Content-Type")
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200)
-  }
-  next()
-})
+// ✅ Stable CORS for GitHub Pages
+app.use(cors({
+  origin: "https://kayrollksm.github.io",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}))
 
-// ✅ THEN JSON PARSER
+// JSON parser
 app.use(express.json())
 
 // Routes
