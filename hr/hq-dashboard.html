@@ -56,22 +56,26 @@
       e.preventDefault();
 
       const nama = document.getElementById('nama').value;
-      const telefon = document.getElementById('telefon').value;
+      const no_telefon = document.getElementById('telefon').value;
       const jawatan = document.getElementById('jawatan').value;
       const gaji = document.getElementById('gaji').value;
       const tarikh_mula = document.getElementById('tarikh_mula').value;
 
+      // Field wajib backend
+      const email = `${no_telefon}@crunchy.com`;
+      const referral = "MC000001A"; // Gantikan dengan ID referral admin (batch A)
+
       const res = await fetch(`${API_BASE}/daftar-calon`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, telefon, jawatan, gaji, tarikh_mula })
+        body: JSON.stringify({ nama, email, no_telefon, referral })
       });
 
       const data = await res.json();
 
       if (res.ok) {
         alert("Berjaya daftar calon!");
-        window.open(`https://wa.me/6${telefon}?text=Assalamualaikum ${nama}, Tahniah! Kami dari Mouthgasm Crunchy ingin melantik anda untuk jawatan ${jawatan}. Sila lengkapkan borang Pengambilan Pekerja: https://yourformlink.com`, '_blank');
+        window.open(`https://wa.me/6${no_telefon}?text=Assalamualaikum ${nama}, Tahniah! Kami dari Mouthgasm Crunchy ingin melantik anda untuk jawatan ${jawatan}. Sila lengkapkan borang Pengambilan Pekerja: https://yourformlink.com`, '_blank');
         form.reset();
         fetchCalon();
       } else {
@@ -88,9 +92,9 @@
         list.innerHTML += `
           <tr class="border-b">
             <td class="py-2">${calon.nama}</td>
-            <td>${calon.telefon}</td>
-            <td>${calon.jawatan}</td>
-            <td>${calon.status}</td>
+            <td>${calon.no_telefon}</td>
+            <td>${calon.jawatan || '-'}</td>
+            <td>${calon.status || '-'}</td>
           </tr>
         `;
       });

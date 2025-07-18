@@ -1,9 +1,11 @@
 import express from "express"
+import cors from "cors" // ← Tambah ini
 import daftarCalon from "./routes/daftar.js"
 import getCalon from "./routes/get-calon.js"
 import getSurat from "./routes/get-surat.js"
 
 const app = express()
+app.use(cors()) // ← Tambah ini
 app.use(express.json())
 
 app.post("/api/daftar-calon", daftarCalon)
