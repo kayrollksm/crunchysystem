@@ -50,13 +50,14 @@
     </div>
 
     <script>
+      const API_BASE = "https://crunchysystem-api.onrender.com/api"
       const form = document.getElementById("calon-form")
       const statusEl = document.getElementById("status")
       const senaraiEl = document.getElementById("senarai-calon")
 
       async function loadCalon() {
         try {
-          const res = await fetch("https://crunchysystem-api.onrender.com/api/get-calon")
+          const res = await fetch(`${API_BASE}/get-calon`)
           const result = await res.json()
           if (res.ok && result.data) {
             senaraiEl.innerHTML = ""
@@ -99,7 +100,7 @@
         }
 
         try {
-          const res = await fetch("https://crunchysystem-api.onrender.com/api/daftar", {
+          const res = await fetch(`${API_BASE}/daftar-calon`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
