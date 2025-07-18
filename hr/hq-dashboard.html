@@ -1,124 +1,110 @@
-<!-- hq-dashboard.html (versi final tanpa anon key - guna API backend sahaja) -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard HR - Mouthgasm Crunchy</title>
-  <link rel="stylesheet" href="../css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HQ Dashboard - HR</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff7f0;
+      padding: 2rem;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+    button {
+      background: #FF5B00;
+      color: white;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    table {
+      margin-top: 3rem;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
-  <div style="max-width: 800px; margin: 2rem auto; padding: 1rem;">
-    <h1 class="dashboard-title">HR Dashboard</h1>
 
-    <!-- BORANG TAMBAH PEKERJA ASAS -->
-    <div class="card">
-      <h2>Tambah Calon Pekerja</h2>
-      <form id="formCalon">
-        <label>Nama:</label>
-        <input type="text" id="nama" required />
+  <div class="card">
+    <h2>Tambah Calon Pekerja</h2>
+    <form id="form-calon">
+      <label>Nama:</label>
+      <input type="text" id="nama" required />
 
-        <label>No. Telefon:</label>
-        <input type="text" id="telefon" required />
+      <label>No. Telefon:</label>
+      <input type="text" id="telefon" required />
 
-        <label>Jawatan:</label>
-        <input type="text" id="jawatan" required />
+      <label>Jawatan:</label>
+      <input type="text" id="jawatan" required />
 
-        <label>Gaji (RM):</label>
-        <input type="number" id="gaji" required />
+      <label>Gaji (RM):</label>
+      <input type="number" id="gaji" required />
 
-        <label>Tarikh Mula:</label>
-        <input type="date" id="tarikh" required />
+      <label>Tarikh Mula:</label>
+      <input type="date" id="tarikh_mula" required />
 
-        <button type="submit" class="btn-primary">Hantar & WhatsApp</button>
-      </form>
-    </div>
-
-    <!-- SENARAI CALON -->
-    <div class="card">
-      <h2 style="margin-bottom: 1rem;">Senarai Calon Pekerja</h2>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="text-align: left;">
-            <th>Nama</th>
-            <th>No. IC</th>
-            <th>No. Telefon</th>
-            <th>Status</th>
-            <th>Tindakan</th>
-          </tr>
-        </thead>
-        <tbody id="calon-list">
-          <!-- Data akan dipaparkan di sini -->
-        </tbody>
-      </table>
-    </div>
+      <button type="submit">Hantar & WhatsApp</button>
+    </form>
   </div>
 
   <script>
-    document.getElementById('formCalon').addEventListener('submit', async function(e) {
-      e.preventDefault()
-      const nama = document.getElementById('nama').value
-      const telefon = document.getElementById('telefon').value
-      const jawatan = document.getElementById('jawatan').value
-      const gaji = document.getElementById('gaji').value
-      const tarikh = document.getElementById('tarikh').value
+    const form = document.getElementById("form-calon");
 
-      const res = await fetch('/api/daftar-calon.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, telefon, jawatan, gaji, tarikh_mula: tarikh })
-      })
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-      const data = await res.json()
-      if (!data?.id) return alert('Ralat semasa simpan data')
+      const nama = document.getElementById("nama").value.trim();
+      const telefon = document.getElementById("telefon").value.trim();
+      const jawatan = document.getElementById("jawatan").value.trim();
+      const gaji = document.getElementById("gaji").value.trim();
+      const tarikh_mula = document.getElementById("tarikh_mula").value;
 
-      const link = `${window.location.origin}/hr/form.html?id=${data.id}`
-      const mesej = `Assalamualaikum ${nama}, Tahniah! Anda dipilih untuk jawatan ${jawatan} di Mouthgasm Crunchy. Sila lengkapkan borang ini: ${link}`
-      const wasap = `https://wa.me/6${telefon.replace(/^0/, '')}?text=${encodeURIComponent(mesej)}`
+      const res = await fetch("https://crunchysystem.vercel.app/api/daftar-calon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ nama, telefon, jawatan, gaji, tarikh_mula })
+      });
 
-      window.open(wasap, '_blank')
-      document.getElementById('formCalon').reset()
-      fetchCalon()
-    })
+      const result = await res.json();
 
-    async function fetchCalon() {
-      const res = await fetch('/api/get-calon.js')
-      const data = await res.json()
+      if (res.ok) {
+        const msg = `Assalamualaikum ${nama}, Tahniah! Kami dari Mouthgasm Crunchy ingin melantik anda untuk jawatan ${jawatan}. Sila lengkapkan borang Pengambilan Pekerja berikut: https://kayrollksm.github.io/crunchysystem/hr/form.html`;
 
-      const tbody = document.getElementById('calon-list')
-      tbody.innerHTML = ''
+        const whatsappLink = `https://wa.me/6${telefon}?text=${encodeURIComponent(msg)}`;
+        window.open(whatsappLink, "_blank");
 
-      data.forEach((calon) => {
-        const row = document.createElement('tr')
-        row.innerHTML = `
-          <td>${calon.nama}</td>
-          <td>${calon.ic || '-'}</td>
-          <td>${calon.telefon}</td>
-          <td>${calon.status}</td>
-          <td>
-            ${calon.status === 'belum_disemak'
-              ? `<button onclick="terimaCalon('${calon.id}')" class="btn-primary">Terima</button>`
-              : `<a href='surat.html?id=${calon.id}' class='btn-primary' target='_blank'>Lihat Surat</a>`}
-          </td>
-        `
-        tbody.appendChild(row)
-      })
-    }
-
-    async function terimaCalon(id) {
-      await fetch('/api/update-calon.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      })
-
-      setTimeout(() => {
-        window.open(`surat.html?id=${id}`, '_blank')
-        fetchCalon()
-      }, 500)
-    }
-
-    fetchCalon()
+        alert("Calon berjaya ditambah & WhatsApp dibuka");
+        form.reset();
+      } else {
+        alert("Ralat: " + result.error);
+        console.error(result.error);
+      }
+    });
   </script>
 </body>
 </html>
