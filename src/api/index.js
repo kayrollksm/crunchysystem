@@ -6,14 +6,15 @@ import getSurat from "./routes/get-surat.js"
 
 const app = express()
 
-// ✅ ENABLE CORS - paling penting baris ni
+// ✅ CORS betul-betul config
 app.use(cors({
-  origin: ["https://kayrollksm.github.io"],
+  origin: "https://kayrollksm.github.io", // domain GitHub Pages
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type"],
+  credentials: false // kalau tak perlu cookie/session
 }))
 
-// JSON parser
+// Middleware JSON
 app.use(express.json())
 
 // Routes
