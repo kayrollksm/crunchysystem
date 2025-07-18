@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
       tarikh_mula
     } = req.body
 
-    // Semakan field wajib
+    // Validasi input
     if (!nama || !email || !no_telefon || !referral) {
       return res.status(400).json({ error: "Semua field diperlukan" })
     }
@@ -37,11 +37,11 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Referral ID tidak sah" })
     }
 
-    // Generate ID Pendaftar Baru
+    // Generate ID Pendaftar baru
     const newId = crypto.randomUUID().slice(0, 8).toUpperCase()
-    const pendaftar_id = `MC${newId}B` // contoh: MCXXXXXXB
+    const pendaftar_id = `MC${newId}B` // Contoh: MC8A12D9B
 
-    // Masukkan data ke table pendaftar
+    // Masukkan ke table pendaftar
     const { error: insertError } = await supabase.from("pendaftar").insert([
       {
         nama,
@@ -53,7 +53,7 @@ router.post("/", async (req, res) => {
         pendaftar_id,
         referral,
         status: "Belum Disahkan"
-      },
+      }
     ])
 
     if (insertError) throw insertError
@@ -63,7 +63,7 @@ router.post("/", async (req, res) => {
       .from("pendaftar")
       .update({
         referral_count: (referrer.referral_count || 0) + 1,
-        jumlah_referral: (referrer.jumlah_referral || 0) + 1,
+        jumlah_referral: (referrer.jumlah_referral || 0) + 1
       })
       .eq("id", referrer.id)
 
@@ -71,7 +71,7 @@ router.post("/", async (req, res) => {
 
     res.status(200).json({
       message: "Pendaftaran berjaya!",
-      data: { pendaftar_id },
+      data: { pendaftar_id }
     })
   } catch (err) {
     console.error(err)

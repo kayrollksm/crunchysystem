@@ -1,116 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HR Dashboard</title>
-  <link rel="stylesheet" href="../css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-</head>
-<body class="bg-orange-50 font-[Inter] text-sm text-[#422814]">
+<html lang="ms">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen text-gray-800">
+    <div class="max-w-4xl mx-auto py-10 px-6 bg-white shadow-md mt-10 rounded-lg">
+      <h1 class="text-2xl font-bold mb-6">HR DASHBOARD</h1>
 
-  <div class="max-w-xl mx-auto py-10 px-5">
-    <h2 class="text-center text-2xl font-bold mb-8">HR DASHBOARD</h2>
+      <h2 class="text-lg font-semibold mb-3">Tambah Calon Pekerja</h2>
+      <form id="calon-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="nama" placeholder="Nama Penuh" required class="w-full px-4 py-2 border rounded" />
+        <input type="text" id="no_telefon" placeholder="No Telefon" required class="w-full px-4 py-2 border rounded" />
+        <input type="text" id="jawatan" placeholder="Jawatan" required class="w-full px-4 py-2 border rounded" />
+        <input type="number" id="gaji" placeholder="Gaji ditawarkan" required class="w-full px-4 py-2 border rounded" />
+        <input type="date" id="tarikh_mula" required class="w-full px-4 py-2 border rounded" />
+        <input type="email" id="email" placeholder="Email Pekerja" required class="w-full px-4 py-2 border rounded" />
+        <input type="text" id="referral" placeholder="ID Referral HQ" required class="w-full px-4 py-2 border rounded" />
+        <div class="md:col-span-2">
+          <button type="submit"
+            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded">
+            Hantar & WhatsApp
+          </button>
+        </div>
+      </form>
 
-    <!-- FORM TAMBAH CALON -->
-    <form id="calon-form" class="bg-white rounded-xl p-6 shadow space-y-4">
-      <h3 class="text-lg font-semibold mb-2">Tambah Calon Pekerja</h3>
+      <div id="status" class="mt-4 text-sm text-green-600 font-medium"></div>
 
-      <input type="text" id="nama" placeholder="Nama" class="input" required />
-      <input type="text" id="telefon" placeholder="No. Telefon" class="input" required />
-      <input type="text" id="jawatan" placeholder="Jawatan" class="input" required />
-      <input type="number" id="gaji" placeholder="Gaji (RM)" class="input" required />
-      <input type="date" id="tarikh_mula" class="input" required />
+      <hr class="my-6" />
 
-      <button type="submit" class="bg-[#FF5B00] text-white py-2 px-4 rounded font-semibold w-full">
-        Hantar & WhatsApp
-      </button>
-    </form>
-
-    <!-- SENARAI CALON -->
-    <div class="mt-10 bg-white rounded-xl p-6 shadow">
-      <h3 class="text-lg font-semibold mb-4">Senarai Calon Pekerja</h3>
+      <h2 class="text-lg font-semibold mb-4">Senarai Calon Pekerja</h2>
       <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead>
-            <tr class="border-b">
-              <th class="py-2">Nama</th>
-              <th>No. Telefon</th>
-              <th>Jawatan</th>
-              <th>Status</th>
+        <table class="min-w-full border border-gray-300 divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-200 text-gray-700">
+            <tr>
+              <th class="px-4 py-2 text-left">Nama</th>
+              <th class="px-4 py-2 text-left">No. Telefon</th>
+              <th class="px-4 py-2 text-left">Jawatan</th>
+              <th class="px-4 py-2 text-left">Status</th>
             </tr>
           </thead>
-          <tbody id="calon-list" class="text-sm"></tbody>
+          <tbody id="senarai-calon" class="bg-white divide-y divide-gray-100">
+            <!-- Calon akan dimasukkan di sini -->
+          </tbody>
         </table>
       </div>
     </div>
-  </div>
 
-  <script>
-    const form = document.getElementById('calon-form');
-    const list = document.getElementById('calon-list');
+    <script>
+      const form = document.getElementById("calon-form")
+      const statusEl = document.getElementById("status")
+      const senaraiEl = document.getElementById("senarai-calon")
 
-    const API_BASE = 'https://crunchysystem-api.onrender.com/api';
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const nama = document.getElementById('nama').value;
-      const no_telefon = document.getElementById('telefon').value;
-      const jawatan = document.getElementById('jawatan').value;
-      const gaji = document.getElementById('gaji').value;
-      const tarikh_mula = document.getElementById('tarikh_mula').value;
-
-      // Field wajib backend
-      const email = `${no_telefon}@crunchy.com`;
-      const referral = "MC000001A"; // Gantikan dengan ID referral admin (batch A)
-
-      const res = await fetch(`${API_BASE}/daftar-calon`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, email, no_telefon, referral })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Berjaya daftar calon!");
-        window.open(`https://wa.me/6${no_telefon}?text=Assalamualaikum ${nama}, Tahniah! Kami dari Mouthgasm Crunchy ingin melantik anda untuk jawatan ${jawatan}. Sila lengkapkan borang Pengambilan Pekerja: https://yourformlink.com`, '_blank');
-        form.reset();
-        fetchCalon();
-      } else {
-        alert("Gagal daftar calon: " + (data.error || "Ralat tidak diketahui"));
+      async function loadCalon() {
+        try {
+          const res = await fetch("https://crunchysystem-api.onrender.com/api/get-calon")
+          const result = await res.json()
+          if (res.ok && result.data) {
+            senaraiEl.innerHTML = ""
+            result.data.forEach(calon => {
+              senaraiEl.innerHTML += `
+                <tr>
+                  <td class="px-4 py-2">${calon.nama}</td>
+                  <td class="px-4 py-2">${calon.no_telefon}</td>
+                  <td class="px-4 py-2">${calon.jawatan || "-"}</td>
+                  <td class="px-4 py-2">
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                      calon.status === "Belum Disahkan"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                    }">${calon.status}</span>
+                  </td>
+                </tr>
+              `
+            })
+          } else {
+            senaraiEl.innerHTML = `<tr><td class="px-4 py-2 text-red-500" colspan="4">Tiada data calon.</td></tr>`
+          }
+        } catch (err) {
+          console.error(err)
+          senaraiEl.innerHTML = `<tr><td class="px-4 py-2 text-red-500" colspan="4">Gagal dapatkan data calon.</td></tr>`
+        }
       }
-    });
 
-    async function fetchCalon() {
-      const res = await fetch(`${API_BASE}/get-calon`);
-      const data = await res.json();
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault()
 
-      list.innerHTML = '';
-      data.forEach(calon => {
-        list.innerHTML += `
-          <tr class="border-b">
-            <td class="py-2">${calon.nama}</td>
-            <td>${calon.no_telefon}</td>
-            <td>${calon.jawatan || '-'}</td>
-            <td>${calon.status || '-'}</td>
-          </tr>
-        `;
-      });
-    }
+        const data = {
+          nama: document.getElementById("nama").value,
+          no_telefon: document.getElementById("no_telefon").value,
+          jawatan: document.getElementById("jawatan").value,
+          gaji: document.getElementById("gaji").value,
+          tarikh_mula: document.getElementById("tarikh_mula").value,
+          email: document.getElementById("email").value,
+          referral: document.getElementById("referral").value
+        }
 
-    fetchCalon();
-  </script>
+        try {
+          const res = await fetch("https://crunchysystem-api.onrender.com/api/daftar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+          })
 
-  <style>
-    .input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      outline: none;
-    }
-  </style>
-</body>
+          const result = await res.json()
+          if (res.ok) {
+            statusEl.textContent = "✅ " + result.message + " ID: " + result.data.pendaftar_id
+            form.reset()
+
+            const msg = `Assalamualaikum ${data.nama}, Tahniah! Anda telah didaftarkan dalam sistem kami.`
+            const waLink = `https://wa.me/${data.no_telefon}?text=${encodeURIComponent(msg)}`
+            window.open(waLink, "_blank")
+
+            loadCalon()
+          } else {
+            statusEl.textContent = "❌ " + (result.error || "Ralat")
+          }
+        } catch (err) {
+          console.error(err)
+          statusEl.textContent = "❌ Gagal submit. Sila semak sambungan server."
+        }
+      })
+
+      // Load calon bila page dibuka
+      loadCalon()
+    </script>
+  </body>
 </html>
