@@ -5,9 +5,9 @@ import getSurat from "./routes/get-surat.js"
 
 const app = express()
 
-// ✅ Manual CORS Middleware
+// ✅ CORS FIX DULU
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*") // atau "https://kayrollksm.github.io"
+  res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
   res.header("Access-Control-Allow-Headers", "Content-Type")
   if (req.method === "OPTIONS") {
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
   next()
 })
 
-// JSON parser
+// ✅ THEN JSON PARSER
 app.use(express.json())
 
 // Routes
